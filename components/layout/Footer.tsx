@@ -16,7 +16,7 @@ export function Footer() {
           { label: 'Terms of Service', href: '/terms' },
           { label: 'Privacy Policy', href: '/privacy' },
           { label: 'Refund Policy', href: '/refund' },
-          { label: 'Support', href: 'mailto:support@promptifill.com' },
+          { label: 'Contact', href: '/contact' },
         ].map(({ label, href }) => (
           <Link key={label} href={href} style={{ fontSize: 13, color: 'var(--text3)', textDecoration: 'none' }}>
             {label}
