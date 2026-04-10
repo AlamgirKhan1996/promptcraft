@@ -3,11 +3,11 @@ import './globals.css';
 import { Providers } from '@/components/layout/Providers';
 
 export const metadata: Metadata = {
-  title: 'PromptCraft — AI Prompt Generator for GCC',
-  description: 'Stop writing bad AI prompts. PromptCraft turns simple answers into expert-level, structured AI prompts instantly. Built for the GCC market with Arabic support.',
+  title: 'PromptiFill — AI Prompt Generator for GCC',
+  description: 'Stop writing bad AI prompts. PromptiFill turns simple answers into expert-level, structured AI prompts instantly. Built for the GCC market with Arabic support.',
   keywords: ['AI prompts', 'prompt engineering', 'ChatGPT prompts', 'Claude prompts', 'Arabic AI', 'GCC tech'],
   openGraph: {
-    title: 'PromptCraft — Perfect AI Prompts Instantly',
+    title: 'PromptiFill — Perfect AI Prompts Instantly',
     description: 'Mad Libs meets Prompt Engineering. Pick a category, fill in the blanks, get expert prompts.',
     images: ['/og-image.png'],
   },

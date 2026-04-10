@@ -24,7 +24,7 @@ export function Navbar() {
           fontSize: 18, fontWeight: 700, color: 'white',
         }}>P</div>
         <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text1)' }}>
-          Prompt<span style={{ color: 'var(--accent)' }}>Craft</span>
+          Prompti<span style={{ color: 'var(--accent)' }}>Fill</span>
         </span>
         <span style={{
           fontSize: 11, padding: '2px 8px', borderRadius: 20, fontWeight: 600,

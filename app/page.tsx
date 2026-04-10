@@ -19,7 +19,7 @@ export default function Home() {
           <span className="grad-text">Get perfect results, every time.</span>
         </h1>
         <p style={{ fontSize: 18, color: 'var(--text2)', maxWidth: 560, margin: '0 auto 36px', lineHeight: 1.7 }}>
-          PromptCraft turns simple answers into expert-level AI prompts. Pick a category, fill in the blanks — get a structured prompt that works on any AI tool.
+          PromptiFill turns simple answers into expert-level AI prompts. Pick a category, fill in the blanks — get a structured prompt that works on any AI tool.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link href="/generate" style={{ padding: '14px 28px', borderRadius: 12, fontSize: 16, fontWeight: 600, background: 'var(--accent)', color: 'white', textDecoration: 'none' }}>
@@ -94,8 +94,8 @@ export default function Home() {
         <div style={{ maxWidth: 700, margin: '0 auto' }}>
           <h2 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text1)', marginBottom: 28, textAlign: 'center' }}>Common Questions</h2>
           {[
-            ['What is PromptCraft?', 'A structured AI prompt generator. Fill in smart blanks, get expert-level prompts optimized for Claude, ChatGPT, Gemini, and any AI tool.'],
-            ['Do I need to know prompt engineering?', 'No — that is the whole point. PromptCraft handles role definition, context, format, and constraints automatically.'],
+            ['What is PromptiFill?', 'A structured AI prompt generator. Fill in smart blanks, get expert-level prompts optimized for Claude, ChatGPT, Gemini, and any AI tool.'],
+            ['Do I need to know prompt engineering?', 'No — that is the whole point. PromptiFill handles role definition, context, format, and constraints automatically.'],
             ['Can I generate Arabic prompts?', 'Yes! A dedicated Arabic/GCC category generates prompts in Modern Standard Arabic (فصحى) with Gulf market context. All categories support bilingual output.'],
             ['Which AI tools work with these prompts?', 'All of them — Claude, ChatGPT, Gemini, LLaMA, Grok, or any model. Our prompts are universal and optimized for all major AI systems.'],
           ].map(([q, a]) => (
