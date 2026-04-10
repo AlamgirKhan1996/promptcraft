@@ -66,7 +66,15 @@ export default function PricingPage() {
           ))}
         </div>
         <p style={{ fontSize: 13, color: 'var(--text3)', marginTop: 32 }}>
-          All plans include 7-day money-back guarantee · Cancel anytime · Secure payment via Lemon Squeezy
+          All plans include a 7-day money-back guarantee · Cancel anytime · Secure payment via Paddle
+        </p>
+        <p style={{ fontSize: 13, color: 'var(--text3)', marginTop: 10 }}>
+          By subscribing you agree to our{' '}
+          <Link href="/terms" style={{ color: '#6366f1', textDecoration: 'none' }}>Terms of Service</Link>
+          {' · '}
+          <Link href="/privacy" style={{ color: '#6366f1', textDecoration: 'none' }}>Privacy Policy</Link>
+          {' · '}
+          <Link href="/refund" style={{ color: '#6366f1', textDecoration: 'none' }}>Refund Policy</Link>
         </p>
       </section>
       <Footer />
