@@ -1,7 +1,7 @@
 'use client';
 // app/library/page.tsx
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
 import { CATEGORIES } from '@/lib/prompt-templates';
@@ -48,7 +48,7 @@ export default function LibraryPage() {
             <div style={{ fontSize: 36, marginBottom: 16 }}>🔒</div>
             <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--text1)', marginBottom: 10 }}>Sign in to save your prompts</div>
             <div style={{ fontSize: 14, color: 'var(--text3)', marginBottom: 24 }}>Your generated prompts are automatically saved when you are signed in.</div>
-            <Link href="/api/auth/signin" style={{ padding: '12px 24px', borderRadius: 10, fontSize: 14, fontWeight: 600, background: 'var(--accent)', color: 'white', textDecoration: 'none' }}>Sign in with Google</Link>
+            <button onClick={() => signIn('google')} style={{ padding: '12px 24px', borderRadius: 10, fontSize: 14, fontWeight: 600, background: 'var(--accent)', color: 'white', border: 'none', cursor: 'pointer' }}>Sign in with Google</button>
           </div>
         ) : (
           <>
