@@ -9,9 +9,9 @@ import { Footer } from '@/components/layout/Footer';
 // PASTE YOUR PAYPAL PLAN IDs HERE
 // ============================================
 const PAYPAL_PLANS = {
-  pro_monthly: 'P-REPLACE_WITH_YOUR_PRO_MONTHLY_PLAN_ID',
-  pro_annual:  'P-REPLACE_WITH_YOUR_PRO_ANNUAL_PLAN_ID',
-  team:        'P-REPLACE_WITH_YOUR_TEAM_PLAN_ID',
+  pro_monthly: 'P-1U036717XP624005NNHM6KOQ',
+  pro_annual:  'P-7PM213498W2163100NHM6QBQ',
+  team:        'P-1HS41106YT741741DNHM6SVY',
 };
 // ============================================
 
