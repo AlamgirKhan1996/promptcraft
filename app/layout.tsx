@@ -12,7 +12,14 @@ export const metadata: Metadata = {
     description: 'Fill in the blanks. Get perfect AI prompts instantly. Works with ChatGPT, Claude, Gemini and any AI tool.',
     images: ['/og-image.png'],
   },
+
+  
+  verification: {
+    google: '<meta name="google-site-verification" content="RqLgSnRAqbNsNDo1gBGtNWho69Bgl_d_FDcn5b1ju5U" />',
+  },
 };
+
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
