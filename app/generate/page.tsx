@@ -1,7 +1,8 @@
 'use client';
 // app/generate/page.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { CategorySelector } from '@/components/generator/CategorySelector';
 import { PromptForm } from '@/components/generator/PromptForm';
@@ -19,22 +20,54 @@ interface Result {
 
 export default function GeneratePage() {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
+  const [prefilledValues, setPrefilledValues] = useState<Record<string, string>>({});
+  const [templateTitle, setTemplateTitle] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
   const [remaining, setRemaining] = useState<number | undefined>(undefined);
-  const [showOutput, setShowOutput] = useState(false);
 
   const user = session?.user as any;
   const plan = user?.plan ?? 'FREE';
   const category = selectedCat ? getCategoryById(selectedCat) : null;
 
-  const handleGenerate = async (inputs: Record<string, string>, improve = false, existingPrompt?: string) => {
+  // Read template from sessionStorage when coming from templates page
+  useEffect(() => {
+    const templateParam = searchParams.get('template');
+    const categoryParam = searchParams.get('category');
+
+    if (templateParam && categoryParam) {
+      // Read pre-filled data from sessionStorage
+      try {
+        const stored = sessionStorage.getItem('promptifill_template');
+        if (stored) {
+          const data = JSON.parse(stored);
+          if (data.templateId === templateParam) {
+            setSelectedCat(data.categoryId);
+            setPrefilledValues(data.inputs || {});
+            setTemplateTitle(data.templateTitle || null);
+            sessionStorage.removeItem('promptifill_template');
+
+            // Show success toast
+            setTimeout(() => setTemplateTitle(null), 4000);
+          }
+        }
+      } catch {
+        // fallback — just set category
+        setSelectedCat(categoryParam);
+      }
+    }
+  }, [searchParams]);
+
+  const handleGenerate = async (
+    inputs: Record<string, string>,
+    improve = false,
+    existingPrompt?: string
+  ) => {
     setGenerating(true);
     setError('');
-    // On mobile scroll to output after generating
-    setShowOutput(true);
     try {
       const res = await fetch('/api/generate-prompt', {
         method: 'POST',
@@ -64,39 +97,57 @@ export default function GeneratePage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <Navbar />
-      <div className="page-pad" style={{ maxWidth: 1200, margin: '0 auto', padding: '28px 24px' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '28px 24px' }}>
 
         {/* Header */}
         <div style={{ marginBottom: 24 }}>
-          <h1 className="page-title" style={{ fontSize: 26, fontWeight: 700, color: 'var(--text1)', marginBottom: 4 }}>
+          <h1 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text1)', marginBottom: 4 }}>
             ✦ Prompt Generator
           </h1>
           <p style={{ fontSize: 14, color: 'var(--text3)' }}>
-            Pick a category → Fill blanks → Get a perfect AI prompt
+            Pick a category → Fill blanks → Get a perfect AI prompt instantly
           </p>
         </div>
+
+        {/* Template loaded banner */}
+        {templateTitle && (
+          <div style={{
+            padding: '12px 18px', borderRadius: 10, marginBottom: 20,
+            background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)',
+            display: 'flex', alignItems: 'center', gap: 10,
+            fontSize: 14, color: '#4ade80', fontWeight: 500,
+            animation: 'fadeIn 0.3s ease',
+          }}>
+            <span style={{ fontSize: 18 }}>✅</span>
+            Template loaded: <strong>{templateTitle}</strong> — form pre-filled! Edit any field and generate.
+          </div>
+        )}
 
         {/* Error */}
         {error && (
           <div style={{
-            padding: '12px 16px', borderRadius: 10, marginBottom: 20, fontSize: 14,
-            background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.25)', color: '#eab308',
-          }}>
-            ⚠ {error}
-          </div>
+            padding: '12px 16px', borderRadius: 10, marginBottom: 20,
+            background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.25)',
+            fontSize: 14, color: '#eab308',
+          }}>⚠ {error}</div>
         )}
 
         {/* Category selector */}
         <CategorySelector
           selected={selectedCat}
-          onSelect={(id) => { setSelectedCat(id); setResult(null); setShowOutput(false); setError(''); }}
+          onSelect={(id) => {
+            setSelectedCat(id);
+            setResult(null);
+            setError('');
+            setPrefilledValues({});
+            setTemplateTitle(null);
+          }}
           userPlan={plan}
         />
 
-        {/* Generator layout — stacked on mobile, side by side on desktop */}
+        {/* Generator layout */}
         {category && (
           <div
-            className="gen-layout"
             style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
@@ -104,7 +155,6 @@ export default function GeneratePage() {
               marginTop: 28,
             }}
           >
-            {/* Form */}
             <div>
               <PromptForm
                 category={category}
@@ -116,7 +166,6 @@ export default function GeneratePage() {
               />
             </div>
 
-            {/* Output */}
             <div id="prompt-output">
               <PromptOutput
                 prompt={result?.prompt ?? ''}
@@ -125,35 +174,19 @@ export default function GeneratePage() {
                 improvements={result?.improvements ?? []}
                 promptId={result?.promptId}
                 generating={generating}
-                onRegenerate={() => handleGenerate({}, false)}
-                onImprove={() => result && handleGenerate({}, true, result.prompt)}
+                onRegenerate={() => handleGenerate(prefilledValues)}
+                onImprove={() => result && handleGenerate(prefilledValues, true, result.prompt)}
               />
             </div>
-          </div>
-        )}
-
-        {/* Mobile tip */}
-        {category && (
-          <div style={{
-            display: 'none',
-            marginTop: 16, padding: '10px 14px', borderRadius: 10,
-            background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
-            fontSize: 13, color: 'var(--text3)',
-          }} className="mobile-only-tip">
-            💡 Tip: After generating, scroll down to see your prompt!
           </div>
         )}
       </div>
 
       <style>{`
         @media (max-width: 768px) {
-          .gen-layout {
-            grid-template-columns: 1fr !important;
-          }
-          .mobile-only-tip {
-            display: block !important;
-          }
+          .gen-layout { grid-template-columns: 1fr !important; }
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </div>
   );
