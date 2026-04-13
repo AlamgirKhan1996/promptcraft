@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from '@/components/layout/Providers';
+import { GoogleAnalytics } from './analytics';
 
 export const metadata: Metadata = {
   title: 'PromptiFill — AI Prompt Generator for GCC',
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <Providers>{children}</Providers>
+        <GoogleAnalytics />
       </body>
     </html>
   );
