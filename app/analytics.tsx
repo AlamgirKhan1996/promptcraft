@@ -1,7 +1,7 @@
 'use client';
 import Script from 'next/script';
 
-const GA_ID = 'G-3WLB61XLCW';
+const GA_ID = 'G-WG7YT478SN';
 
 export function GoogleAnalytics() {
   return (
