@@ -1,6 +1,6 @@
 'use client';
 // components/generator/PromptForm.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CategoryConfig, FieldConfig } from '@/lib/prompt-templates';
 
 interface Props {
@@ -8,6 +8,7 @@ interface Props {
   onGenerate: (inputs: Record<string, string>, improve?: boolean, existingPrompt?: string) => void;
   generating: boolean;
   existingPrompt?: string;
+  prefilledValues?: Record<string, string>;
   remaining?: number;
   userPlan?: string;
 }
@@ -55,9 +56,16 @@ function Field({ field, value, onChange }: { field: FieldConfig; value: string; 
   return <input type="text" value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder={field.placeholder} style={base} />;
 }
 
-export function PromptForm({ category, onGenerate, generating, existingPrompt, remaining, userPlan = 'FREE' }: Props) {
-  const [values, setValues] = useState<Record<string, string>>({});
+export function PromptForm({ category, onGenerate, generating, existingPrompt, prefilledValues = {}, remaining, userPlan = 'FREE' }: Props) {
+  const [values, setValues] = useState<Record<string, string>>(prefilledValues);
   const set = (key: string, val: string) => setValues((v) => ({ ...v, [key]: val }));
+
+  // Update values when prefilledValues change (template loaded)
+  useEffect(() => {
+    if (Object.keys(prefilledValues).length > 0) {
+      setValues(prefilledValues);
+    }
+  }, [prefilledValues]);
 
   const hasRequired = category.fields.filter((f) => f.required).every((f) => values[f.key]?.trim());
   const limitReached = remaining === 0;
