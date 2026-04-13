@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from '@/components/layout/Providers';
 import { GoogleAnalytics } from './analytics';
-
+import { Analytics } from "@vercel/analytics/next"
 export const metadata: Metadata = {
   verification: {
    google: '<meta name="google-site-verification" content="RqLgSnRAqbNsNDo1gBGtNWho69Bgl_d_FDcn5b1ju5U" />',
@@ -32,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Providers>{children}</Providers>
         <GoogleAnalytics />
+        <Analytics />
       </body>
     </html>
   );
