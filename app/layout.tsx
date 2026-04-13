@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
   
   verification: {
-    google: 'RqLgSnRAqbNsNDo1gBGtNWho69Bgl_d_FDcn5b1ju5U',
+   google: '<meta name="google-site-verification" content="RqLgSnRAqbNsNDo1gBGtNWho69Bgl_d_FDcn5b1ju5U" />',
   },
 };
 
