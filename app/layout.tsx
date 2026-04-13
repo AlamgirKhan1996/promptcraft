@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from '@/components/layout/Providers';
 import { GoogleAnalytics } from './analytics';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
   verification: {
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Providers>{children}</Providers>
         <GoogleAnalytics />
+        <Analytics />
       </body>
     </html>
   );
