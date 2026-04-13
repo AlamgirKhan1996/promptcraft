@@ -1,38 +1,51 @@
 // app/api/webhooks/whop/route.ts
-// This runs automatically when someone buys on Whop
-// Whop sends us a notification → we upgrade the user in database
-
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// Your Whop Plan IDs → Plan mapping
 const PLAN_MAP: Record<string, 'PRO' | 'TEAM'> = {
-  'plan_fUNcurOmyjCzd': 'PRO',   // Pro Monthly
-  'plan_nw9EdRPuERaOh': 'PRO',   // Pro Annual
-  'plan_OEHZApFI2TKlg': 'TEAM',  // Team
+  'plan_fUNcurOmyjCzd': 'PRO',
+  'plan_nw9EdRPuERaOh': 'PRO',
+  'plan_OEHZApFI2TKlg': 'TEAM',
 };
+
+// Events that mean someone PAID
+const ACTIVE_EVENTS = [
+  'membership.activated',    // ← THIS is what Whop actually sends!
+  'membership.went_valid',
+  'membership.created',
+  'membership.updated',
+];
+
+// Events that mean cancelled/expired
+const INACTIVE_EVENTS = [
+  'membership.went_invalid',
+  'membership.expired',
+  'membership.cancelled',
+];
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log('Whop webhook received:', body);
+    console.log('Whop webhook received:', JSON.stringify(body, null, 2));
 
-    const { action, data } = body;
+    const eventType = body.type;
+    const data = body.data;
+    const email = data?.user?.email;
+    const planId = data?.plan?.id;
+    const status = data?.status;
 
-    // Someone just bought a plan
-    if (action === 'membership.went_valid' || action === 'membership.created') {
-      const email = data?.user?.email;
-      const planId = data?.plan_id;
-      const whopMemberId = data?.id;
+    console.log(`Event: ${eventType} | Email: ${email} | Plan: ${planId} | Status: ${status}`);
 
+    // Handle active/paid events
+    if (ACTIVE_EVENTS.includes(eventType) || status === 'completed' || status === 'active') {
       if (!email) {
-        console.log('No email in webhook — manual upgrade needed');
-        return NextResponse.json({ received: true });
+        console.log('No email found in webhook');
+        return NextResponse.json({ received: true, note: 'no email' });
       }
 
       const newPlan = PLAN_MAP[planId] ?? 'PRO';
 
-      // Find user by email and upgrade them
+      // Try to find user by email
       const user = await prisma.user.findUnique({ where: { email } });
 
       if (user) {
@@ -42,25 +55,31 @@ export async function POST(req: NextRequest) {
         });
         console.log(`✅ Upgraded ${email} to ${newPlan}`);
       } else {
-        // User hasn't signed up yet — store pending upgrade
-        // They'll get upgraded when they first sign in
-        console.log(`⚠️ User ${email} not found — will upgrade on first login`);
+        console.log(`⚠️ User ${email} not in DB yet — they need to sign in first`);
       }
+
+      return NextResponse.json({ 
+        received: true, 
+        action: 'upgrade',
+        email, 
+        plan: newPlan,
+        userFound: !!user,
+      });
     }
 
-    // Someone cancelled or refunded
-    if (action === 'membership.went_invalid' || action === 'membership.expired') {
-      const email = data?.user?.email;
+    // Handle cancellation
+    if (INACTIVE_EVENTS.includes(eventType)) {
       if (email) {
-        await prisma.user.update({
+        await prisma.user.updateMany({
           where: { email },
           data: { plan: 'FREE' },
         });
         console.log(`↩️ Downgraded ${email} to FREE`);
       }
+      return NextResponse.json({ received: true, action: 'downgrade', email });
     }
 
-    return NextResponse.json({ received: true, success: true });
+    return NextResponse.json({ received: true, action: 'ignored', eventType });
   } catch (error) {
     console.error('Whop webhook error:', error);
     return NextResponse.json({ error: 'Webhook failed' }, { status: 500 });
