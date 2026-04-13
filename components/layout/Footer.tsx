@@ -24,7 +24,7 @@ export function Footer() {
         ))}
       </div>
       <div style={{ fontSize: 12, color: 'var(--text3)' }}>
-        © 2026 Prompti<span style={{ color: 'var(--accent)' }}>Fill</span> · Made with ❤ for the MENA tech market · Riyadh, KSA
+        © 2026 Prompti<span>Fill</span> · Made with ❤ for the MENA tech market · Riyadh, KSA
       </div>
     </footer>
   );
