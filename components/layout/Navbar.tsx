@@ -6,6 +6,39 @@ import { usePathname } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import { BuildNavTooltip } from '@/components/onboarding/BuildOnboarding';
 
+// Simple pulsing NEW badge for Build tab
+function BuildBadge() {
+  const [show, setShow] = useState(true);
+
+  useEffect(() => {
+    const d = localStorage.getItem('promptifill_build_nav_dismissed');
+    if (d) setShow(false);
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <span
+      onClick={() => {
+        localStorage.setItem('promptifill_build_nav_dismissed', 'true');
+        setShow(false);
+      }}
+      style={{
+        position: 'absolute',
+        top: -4, right: -4,
+        background: 'linear-gradient(135deg, #6366f1, #22d3ee)',
+        color: 'white', fontSize: 8, fontWeight: 800,
+        padding: '2px 4px', borderRadius: 5,
+        letterSpacing: 0.3, lineHeight: 1,
+        cursor: 'pointer', zIndex: 10,
+        animation: 'pulse-new 2s ease-in-out infinite',
+        boxShadow: '0 2px 8px rgba(99,102,241,0.6)',
+        userSelect: 'none',
+      }}
+    >NEW</span>
+  );
+}
+
 export function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
@@ -70,8 +103,7 @@ export function Navbar() {
         {/* Desktop links */}
         <div className="nav-links-desktop" style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           {navLinks.map(({ href, label, isBuild }) => (
-            <div key={href} style={{ position: 'relative' }}>
-              {isBuild && <BuildNavTooltip />}
+            <div key={href} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
               <Link href={href} style={{
                 padding: '7px 12px', borderRadius: 8, fontSize: 13, fontWeight: 500,
                 textDecoration: 'none', transition: 'all 0.2s',
@@ -79,6 +111,8 @@ export function Navbar() {
                 background: pathname === href ? 'var(--bg3)' : 'transparent',
                 display: 'block',
               }}>{label}</Link>
+              {/* NEW badge — only on Build tab */}
+              {isBuild && <BuildBadge />}
             </div>
           ))}
 

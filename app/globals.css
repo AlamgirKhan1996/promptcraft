@@ -58,6 +58,10 @@ input, select, textarea { font-family: inherit; }
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
+@keyframes pulse-new {
+  0%, 100% { transform: scale(1); box-shadow: 0 2px 8px rgba(99,102,241,0.5); }
+  50% { transform: scale(1.15); box-shadow: 0 2px 14px rgba(99,102,241,0.9); }
+}
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
