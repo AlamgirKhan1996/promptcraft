@@ -63,7 +63,7 @@ export function BuildNavTooltip() {
         }}>
           {/* Arrow */}
           <div style={{
-            position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%)',
+            position: 'absolute', top: -6, left: '50%',
             width: 10, height: 10, background: 'var(--bg2)',
             border: '1px solid rgba(99,102,241,0.4)',
             borderBottom: 'none', borderRight: 'none',
