@@ -27,6 +27,7 @@ export function Navbar() {
   const navLinks = [
     { href: '/generate', label: '✦ Generator' },
     { href: '/library', label: '📚 Library' },
+    { href: '/build', label: '🚀 Build' },
     { href: '/templates', label: '🗂 Templates' },
     { href: '/dashboard', label: '📊 Dashboard' },
     { href: '/pricing', label: '💎 Pricing' },
