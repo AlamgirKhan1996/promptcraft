@@ -7,7 +7,7 @@ import { CATEGORIES } from '@/lib/prompt-templates';
 export default function Home() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <Navbar />
+      <Navbar /><meta name='impact-site-verification' content='36c05507-b215-4a50-aa3f-221d0e2d9a12'></meta>
 
       {/* HERO */}
       <section className="hero-gradient" style={{ textAlign: 'center', padding: '90px 24px 70px' }}>
