@@ -1,16 +1,13 @@
 'use client';
 // app/build/page.tsx
-// "Build a Website with Claude AI" — special workflow page
-// URL: promptifill.com/build
-// This page is also an SEO goldmine for "build website with AI"
-
 import { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import Link from 'next/link';
+import { BuildPageModal } from '@/components/onboarding/BuildOnboarding';
 
 // ─── YOUR AFFILIATE LINKS ──────────────────────────────
-const NAMECHEAP_AFFILIATE = 'https://namecheap.com/?aff=YOUR_ID'; // Replace!
+const NAMECHEAP_AFFILIATE = 'https://namecheap.pxf.io/c/7192894/3861474/5618'; // Replace!
 const HOSTINGER_AFFILIATE  = 'https://hostinger.com/?AFFILIATE=YOUR_ID'; // Replace!
 // ──────────────────────────────────────────────────────
 
@@ -131,6 +128,7 @@ ${form.language !== 'English' ? 'Include full RTL Arabic support' : ''}
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+      <BuildPageModal />
       <Navbar />
 
       {/* Hero */}

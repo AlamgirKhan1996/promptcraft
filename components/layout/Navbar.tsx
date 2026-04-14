@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
+import { BuildNavTooltip } from '@/components/onboarding/BuildOnboarding';
 
 export function Navbar() {
   const { data: session } = useSession();
@@ -25,12 +26,12 @@ export function Navbar() {
   }, []);
 
   const navLinks = [
-    { href: '/generate', label: '✦ Generator' },
-    { href: '/library', label: '📚 Library' },
-    { href: '/build', label: '🚀 Build' }, 
-    { href: '/templates', label: '🗂 Templates' },
-    { href: '/dashboard', label: '📊 Dashboard' },
-    { href: '/pricing', label: '💎 Pricing' },
+    { href: '/generate', label: '✦ Generator', isBuild: false },
+    { href: '/build', label: '🚀 Build', isBuild: true },
+    { href: '/library', label: '📚 Library', isBuild: false },
+    { href: '/templates', label: '🗂 Templates', isBuild: false },
+    { href: '/dashboard', label: '📊 Dashboard', isBuild: false },
+    { href: '/pricing', label: '💎 Pricing', isBuild: false },
   ];
 
   return (
@@ -68,13 +69,17 @@ export function Navbar() {
 
         {/* Desktop links */}
         <div className="nav-links-desktop" style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {navLinks.map(({ href, label }) => (
-            <Link key={href} href={href} style={{
-              padding: '7px 12px', borderRadius: 8, fontSize: 13, fontWeight: 500,
-              textDecoration: 'none', transition: 'all 0.2s',
-              color: pathname === href ? 'var(--text1)' : 'var(--text2)',
-              background: pathname === href ? 'var(--bg3)' : 'transparent',
-            }}>{label}</Link>
+          {navLinks.map(({ href, label, isBuild }) => (
+            <div key={href} style={{ position: 'relative' }}>
+              {isBuild && <BuildNavTooltip />}
+              <Link href={href} style={{
+                padding: '7px 12px', borderRadius: 8, fontSize: 13, fontWeight: 500,
+                textDecoration: 'none', transition: 'all 0.2s',
+                color: pathname === href ? 'var(--text1)' : 'var(--text2)',
+                background: pathname === href ? 'var(--bg3)' : 'transparent',
+                display: 'block',
+              }}>{label}</Link>
+            </div>
           ))}
 
           {/* Avatar dropdown — Settings lives here */}
