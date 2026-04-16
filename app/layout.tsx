@@ -5,7 +5,7 @@ import { GoogleAnalytics } from './analytics';
 import { Analytics } from "@vercel/analytics/next"
 export const metadata: Metadata = {
   verification: {
-   google: '<meta name="google-site-verification" content="RqLgSnRAqbNsNDo1gBGtNWho69Bgl_d_FDcn5b1ju5U" />',
+   google: 'RqLgSnRAqbNsNDo1gBGtNWho69Bgl_d_FDcn5b1ju5U',
   },
   title: 'PromptiFill — AI Prompt Generator for GCC',
   description: 'Fill in the blanks. Get perfect AI prompts instantly. Built for GCC founders and creators with Arabic support.',
