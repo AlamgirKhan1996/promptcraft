@@ -244,7 +244,8 @@ function PreviewPanel({
               background: 'white',
               boxShadow: device === 'mobile' ? '0 20px 60px rgba(0,0,0,0.5)' : 'none',
             }}
-            sandbox="allow-scripts allow-same-origin"
+            loading= "eager"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
             title="Website Preview"
           />
         </div>

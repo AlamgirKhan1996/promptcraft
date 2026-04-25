@@ -81,7 +81,12 @@ Design principles:
 - Typography: Clean, modern, readable
 - Spacing: Generous padding, breathing room
 - Cards: Glass morphism or solid with subtle borders
-- Buttons: Gradient, rounded, with hover effects`;
+- Buttons: Gradient, rounded, with hover effects
+- Always set explicit background color on <body>: style="background:#08081a" or your chosen color
+- NEVER rely on Tailwind alone for backgrounds — always add inline style too
+- Every section must have explicit background-color in style attribute
+- Use <script src="https://cdn.tailwindcss.com"></script> AND also add critical CSS in <style> tag
+- Add this in <head>: <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:">`;
 
     // ── USER PROMPT ───────────────────────────────────
     const userPrompt = `Build a complete, stunning, production-ready website with these specifications:
