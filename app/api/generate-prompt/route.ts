@@ -24,7 +24,10 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     const user = session?.user as any;
     const userId = user?.id ?? null;
-    const plan = user?.plan ?? 'FREE';
+    const dbUser = userId ? await prisma.user.findUnique({
+  where: { id: userId }, select: { plan: true }
+}) : null;
+const plan = dbUser?.plan ?? 'FREE';
 
     // Check if category is available for this plan
     if (category.proOnly && plan === 'FREE') {

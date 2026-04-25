@@ -22,8 +22,11 @@ const RUN_LIMITS: Record<string, number> = {
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    const plan = (session?.user as any)?.plan ?? 'FREE';
     const userId = (session?.user as any)?.id;
+const dbUser = userId ? await prisma.user.findUnique({
+  where: { id: userId }, select: { plan: true }
+}) : null;
+const plan = dbUser?.plan ?? 'FREE';
 
     // Parse request
     const { prompt, category, promptId } = await req.json();
