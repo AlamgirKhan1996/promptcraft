@@ -1,6 +1,7 @@
 'use client';
 // components/generator/PromptOutput.tsx
 import { useState } from 'react';
+import { RunResult } from '../prompt/RunResult';
 
 interface Props {
   prompt: string;
@@ -9,11 +10,12 @@ interface Props {
   improvements: string[];
   promptId?: string | null;
   generating: boolean;
+  category?: string;
   onRegenerate: () => void;
   onImprove: () => void;
 }
 
-export function PromptOutput({ prompt, score, reason, improvements, generating, onRegenerate, onImprove }: Props) {
+export function PromptOutput({ prompt, score, reason, improvements, generating, category = "general", onRegenerate, onImprove }: Props) {
   const [copied, setCopied] = useState(false);
 
   const copy = () => {
@@ -80,6 +82,14 @@ export function PromptOutput({ prompt, score, reason, improvements, generating, 
         whiteSpace: 'pre-wrap', fontFamily: "'Menlo', 'Monaco', monospace",
         maxHeight: 380, overflowY: 'auto',
       }}>{prompt}</div>
+
+      <div style={{ marginTop: 16 }}>
+        <RunResult
+          prompt={prompt}
+          category={category}
+          promptId={promptId || undefined}
+        />
+      </div>
 
       {/* Quality score */}
       {score !== null && (

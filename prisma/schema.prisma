@@ -32,6 +32,8 @@ model User {
   prompts   Prompt[]
   favorites UserFavorite[]
   folders   PromptFolder[]
+
+  promptRuns PromptRun[]
 }
 
 model Account {
@@ -48,6 +50,7 @@ model Account {
   id_token          String? @db.Text
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([provider, providerAccountId])
 }
 
@@ -63,6 +66,7 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
+
   @@unique([identifier, token])
 }
 
@@ -107,6 +111,23 @@ model PromptFolder {
   prompts   Prompt[] @relation("PromptFolders")
 }
 
+model PromptRun {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promptId      String? // optional — links to the Prompt that was generated
+  prompt        String   @db.Text
+  result        String   @db.Text
+  category      String   @default("general")
+  tokensUsed    Int      @default(0)
+  executionTime Int      @default(0) // milliseconds
+  plan          String   @default("FREE")
+  createdAt     DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([userId])
+}
+
 model UserFavorite {
   id        String   @id @default(cuid())
   userId    String
@@ -114,5 +135,6 @@ model UserFavorite {
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   prompt    Prompt   @relation(fields: [promptId], references: [id], onDelete: Cascade)
+
   @@unique([userId, promptId])
 }
