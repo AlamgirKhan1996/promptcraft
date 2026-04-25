@@ -30,7 +30,6 @@ function WhopButton({ planId, label, primary }: { planId: string; label: string;
   return (
     <div style={{ marginTop: 12 }}>
       {/* Whop native embed button */}
-      <div data-whop-checkout-plan-id={planId} />
 
       {/* Fallback direct link */}
       <a
@@ -84,7 +83,6 @@ const features = {
 export default function PricingPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <WhopScript />
       <Navbar />
 
       <section style={{ padding: '70px 24px', textAlign: 'center' }}>
