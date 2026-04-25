@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from '@/components/layout/Providers';
 import { GoogleAnalytics } from './analytics';
+import './mobile-fix.css';
 
 // ─────────────────────────────────────────────────
 // THIS IS THE KEY FIX — metadataBase tells Next.js
