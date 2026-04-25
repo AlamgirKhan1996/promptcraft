@@ -238,14 +238,13 @@ function PreviewPanel({
             srcDoc={html}
             style={{
               width: device === 'mobile' ? '390px' : '100%',
-              height: device === 'mobile' ? '700px' : '700px',
+              height: device === 'mobile' ? '780px' : '780px',
               border: device === 'mobile' ? '8px solid #0f1120' : 'none',
               borderRadius: device === 'mobile' ? 24 : '0 0 16px 16px',
-              background: 'white',
+              background: 'transparent',
               boxShadow: device === 'mobile' ? '0 20px 60px rgba(0,0,0,0.5)' : 'none',
             }}
-            loading= "eager"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-top-navigation-by-user-activation"
             title="Website Preview"
           />
         </div>
@@ -338,6 +337,7 @@ export default function BuildPage() {
   const [generatedHtml, setGeneratedHtml] = useState('');
   const [error, setError] = useState('');
   const [buildTime, setBuildTime] = useState(0);
+  const [lineCount, setLineCount] = useState(0);
 
   // Form state
   const [websiteType, setWebsiteType] = useState('');
@@ -396,6 +396,7 @@ export default function BuildPage() {
 
       setBuildTime(Date.now() - startTime);
       setGeneratedHtml(data.html);
+      setLineCount(data.lineCount || 0);
       setStep('preview');
 
     } catch (e) {
@@ -489,7 +490,7 @@ export default function BuildPage() {
                     Your website is ready! Built in {(buildTime / 1000).toFixed(1)} seconds.
                   </div>
                   <div style={{ fontSize: 12, color: '#64748b' }}>
-                    Download the HTML file → Deploy on Vercel → Add $9 domain
+                    Fully functional · Every button works · Download → Deploy on Vercel
                   </div>
                 </div>
               </div>
