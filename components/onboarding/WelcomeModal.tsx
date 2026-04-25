@@ -1,138 +1,148 @@
 'use client';
 // components/onboarding/WelcomeModal.tsx
-// Shows EVERY time user visits (unless they click "Never show again")
-// "Never show again" = permanent dismiss stored in localStorage
+// New onboarding for upgraded PromptiFill
+// Shows every visit unless user clicks "Never show again"
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-const NEVER_SHOW_KEY = 'promptifill_welcome_never';
+const NEVER_KEY = 'promptifill_welcome_v3_never';
 
 const STEPS = [
   {
     id: 1,
     emoji: '✦',
-    title: 'Welcome to PromptiFill!',
-    subtitle: 'Perfect AI prompts in 30 seconds',
-    description: 'Most people get bad AI results because their prompts are weak. PromptiFill fixes that automatically — no prompt engineering knowledge needed.',
+    badge: 'WELCOME',
+    badgeColor: '#6366f1',
+    title: 'PromptiFill just got a major upgrade',
+    subtitle: 'Everything runs inside the app now',
+    desc: 'No more copy-paste. No more going to Claude.ai. Generate your perfect AI prompt AND get the result — all inside PromptiFill in one click.',
     visual: 'intro',
-    cta: 'Show me how →',
+    cta: 'Show me →',
   },
   {
     id: 2,
-    emoji: '1️⃣',
-    title: 'Pick Your Category',
-    subtitle: '10 specialized categories',
-    description: 'Choose what you want to create — Social Media, Business Strategy, Coding, Arabic GCC content, and 6 more. Each category has its own smart form built for that use case.',
-    visual: 'categories',
-    cta: 'Got it, next →',
+    emoji: '⚡',
+    badge: 'GENERATE + RUN',
+    badgeColor: '#6366f1',
+    title: 'Generate prompt → Result appears instantly',
+    subtitle: 'One click. No leaving the app.',
+    desc: 'Fill in your details → PromptiFill generates the perfect structured prompt → AND immediately runs it through Claude AI → Your result appears with a typewriter effect. Done.',
+    visual: 'generate',
+    cta: 'Next →',
   },
   {
     id: 3,
-    emoji: '2️⃣',
-    title: 'Fill In The Blanks',
-    subtitle: '5–8 smart guided fields',
-    description: 'Answer simple questions about your goal, audience, and tone. No writing skills needed — just fill in what you know. PromptiFill handles the rest.',
-    visual: 'form',
-    cta: 'Almost there →',
+    emoji: '🚀',
+    badge: 'WEBSITE BUILDER',
+    badgeColor: '#059669',
+    title: 'Build complete websites — like Lovable',
+    subtitle: 'Describe it → AI builds it → Live preview',
+    desc: 'Go to the Build tab → describe your business → PromptiFill AI generates a FULLY FUNCTIONAL website with working navigation, forms, animations. Desktop + mobile preview. Download and deploy for $9/year.',
+    visual: 'build',
+    cta: 'Next →',
   },
   {
     id: 4,
-    emoji: '3️⃣',
-    title: 'Get a Perfect Prompt',
-    subtitle: 'Expert-level, structured, ready to copy',
-    description: 'Claude AI generates a professional prompt with role, context, task, format, tone, and constraints — all built in. Plus a quality score out of 10!',
-    visual: 'output',
+    emoji: '🌍',
+    badge: 'ARABIC GCC — EXCLUSIVE',
+    badgeColor: '#f59e0b',
+    title: 'First AI tool built for the Arab world',
+    subtitle: 'Arabic RTL · GCC market · Cultural context',
+    desc: 'Exclusive Arabic GCC category understands Gulf business culture, writes in Modern Standard Arabic, and builds bilingual websites with proper RTL support. Nobody else has this.',
+    visual: 'arabic',
     cta: "Let's go! 🚀",
   },
 ];
 
-const CATEGORY_DEMOS = [
-  { emoji: '💼', name: 'Business', color: '#6366f1' },
-  { emoji: '📱', name: 'Social Media', color: '#22d3ee' },
-  { emoji: '💻', name: 'Coding', color: '#4ade80' },
-  { emoji: '🌍', name: 'Arabic GCC', color: '#f59e0b' },
-  { emoji: '📧', name: 'Email', color: '#f472b6' },
-  { emoji: '🛒', name: 'eCommerce', color: '#a78bfa' },
-];
-
+// ── Mini visual for each step ─────────────────────────
 function StepVisual({ visual }: { visual: string }) {
   const [tick, setTick] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setTick(x => x + 1), 1200);
+    const t = setInterval(() => setTick(x => x + 1), 1000);
     return () => clearInterval(t);
   }, []);
 
   if (visual === 'intro') return (
-    <div style={{ textAlign: 'center', padding: '16px 0' }}>
-      <div style={{ padding: '12px 16px', borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontSize: 13, color: '#ef4444', marginBottom: 10, fontFamily: 'monospace' }}>
-        ❌ "write me a marketing post"
-      </div>
-      <div style={{ fontSize: 18, color: 'var(--accent)', margin: '6px 0' }}>↓ PromptiFill ↓</div>
-      <div style={{ padding: '12px 16px', borderRadius: 10, background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)', fontSize: 12, color: '#4ade80', fontFamily: 'monospace', textAlign: 'left', lineHeight: 1.6 }}>
-        ✅ Act as a GCC social media expert...<br/>
-        Context: Saudi audience, 25-35...<br/>
-        Task: Instagram caption for...<br/>
-        Format: 150 words, 3 hashtags...<br/>
-        <span style={{ color: '#6366f1', fontWeight: 700 }}>Score: 9/10 ⭐</span>
-      </div>
-    </div>
-  );
-
-  if (visual === 'categories') return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-      {CATEGORY_DEMOS.map((cat, i) => (
-        <div key={cat.name} style={{
-          padding: '12px 8px', borderRadius: 10, textAlign: 'center',
-          background: `${cat.color}10`, border: `1px solid ${cat.color}30`,
-          transform: tick % 6 === i ? 'scale(1.06)' : 'scale(1)',
-          transition: 'all 0.3s',
-          boxShadow: tick % 6 === i ? `0 0 14px ${cat.color}30` : 'none',
-        }}>
-          <div style={{ fontSize: 20, marginBottom: 3 }}>{cat.emoji}</div>
-          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text2)' }}>{cat.name}</div>
+    <div style={{ padding: '12px 0' }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+        <div style={{ flex: 1, padding: '10px 12px', borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontSize: 12, color: '#ef4444' }}>
+          ❌ Old: Copy prompt → Open Claude.ai tab → Paste → Wait → Copy result → Come back
         </div>
-      ))}
+      </div>
+      <div style={{ textAlign: 'center', color: '#6366f1', fontSize: 16, margin: '6px 0' }}>↓</div>
+      <div style={{ padding: '10px 12px', borderRadius: 10, background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)', fontSize: 12, color: '#4ade80' }}>
+        ✅ New: Fill form → Click Generate → Result appears inside PromptiFill instantly ✦
+      </div>
     </div>
   );
 
-  if (visual === 'form') return (
-    <div>
-      {[
-        { label: 'What is your product?', value: 'Saudi specialty coffee', done: true },
-        { label: 'Target audience?', value: 'Professionals, 25-35', done: true },
-        { label: 'Platform?', value: 'Instagram', done: tick > 1 },
-        { label: 'Goal?', value: 'Drive foot traffic', done: tick > 3 },
-      ].map((field) => (
-        <div key={field.label} style={{ marginBottom: 8 }}>
-          <div style={{ fontSize: 10, color: 'var(--text3)', marginBottom: 3 }}>{field.label}</div>
-          <div style={{
-            padding: '7px 10px', borderRadius: 7, fontSize: 12,
-            background: 'var(--bg)',
-            border: `1px solid ${field.done ? 'rgba(99,102,241,0.4)' : 'var(--border)'}`,
-            color: field.done ? 'var(--text1)' : 'var(--text3)',
-            transition: 'all 0.4s', minHeight: 30,
-          }}>
-            {field.done ? field.value : '...'}
-          </div>
+  if (visual === 'generate') return (
+    <div style={{ fontSize: 12, fontFamily: 'monospace' }}>
+      {/* Step indicator mini */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+        {['📂 Category','✏️ Fill','⚡ Generate','✅ Result'].map((s,i) => (
+          <div key={i} style={{
+            flex: 1, padding: '4px 2px', borderRadius: 6, textAlign: 'center', fontSize: 9,
+            background: tick % 4 === i ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)',
+            color: tick % 4 === i ? '#818cf8' : '#334155',
+            border: `1px solid ${tick % 4 === i ? 'rgba(99,102,241,0.4)' : 'transparent'}`,
+            transition: 'all 0.3s',
+          }}>{s}</div>
+        ))}
+      </div>
+      <div style={{ padding: '10px 12px', borderRadius: 10, background: 'rgba(4,4,20,0.8)', border: '1px solid rgba(74,222,128,0.2)', lineHeight: 1.7, color: '#94a3b8' }}>
+        <span style={{ color: '#818cf8' }}>ROLE:</span> Expert GCC social media strategist...<br/>
+        <span style={{ color: '#67e8f9' }}>CONTEXT:</span> Saudi coffee brand, Riyadh...<br/>
+        <span style={{ color: '#86efac' }}>TASK:</span> Instagram caption driving sales...<br/>
+        <div style={{ marginTop: 8, color: '#4ade80', fontWeight: 700 }}>
+          ▶ Running... Result: "قهوة ريادة، ذوق أصيل..."
         </div>
-      ))}
+      </div>
     </div>
   );
 
-  if (visual === 'output') return (
+  if (visual === 'build') return (
     <div>
-      <div style={{ padding: '12px', borderRadius: 10, background: 'var(--bg)', border: '1px solid rgba(99,102,241,0.3)', marginBottom: 10, fontSize: 11, fontFamily: 'monospace', color: 'var(--text2)', lineHeight: 1.7, maxHeight: 100, overflow: 'hidden' }}>
-        <span style={{ color: '#6366f1' }}>ROLE:</span> Act as a GCC social media expert...<br/>
-        <span style={{ color: '#22d3ee' }}>CONTEXT:</span> Saudi coffee brand targeting...<br/>
-        <span style={{ color: '#4ade80' }}>TASK:</span> Create an Instagram caption...
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+        {['🍽️ Restaurant','👤 Portfolio','💼 Business','🛒 Store'].map((t,i) => (
+          <div key={i} style={{
+            padding: '4px 10px', borderRadius: 14, fontSize: 11,
+            background: tick % 4 === i ? 'rgba(5,150,105,0.2)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${tick % 4 === i ? 'rgba(5,150,105,0.4)' : 'rgba(255,255,255,0.06)'}`,
+            color: tick % 4 === i ? '#4ade80' : '#334155',
+            transition: 'all 0.3s',
+          }}>{t}</div>
+        ))}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderRadius: 8, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
-        <span style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 600 }}>Quality Score</span>
-        <span style={{ fontSize: 20, fontWeight: 800, background: 'linear-gradient(90deg, #6366f1, #22d3ee)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>9/10</span>
+      <div style={{ padding: '10px 12px', borderRadius: 10, background: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.2)', fontSize: 12, color: '#64748b', lineHeight: 1.7 }}>
+        <div style={{ color: '#4ade80', fontWeight: 700, marginBottom: 6 }}>✦ Website Builder — Live Preview</div>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', marginTop: 4 }} />
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#f59e0b', marginTop: 4 }} />
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', marginTop: 4 }} />
+          <span style={{ fontSize: 10, color: '#334155', marginLeft: 4 }}>clothes-shop.vercel.app ✓ LIVE</span>
+        </div>
+        <div style={{ color: '#94a3b8' }}>Working nav · Forms · Animations · Mobile ready</div>
+        <div style={{ color: '#334155', marginTop: 4 }}>⬇ Download · 🚀 Deploy · $9/year domain</div>
       </div>
     </div>
   );
+
+  if (visual === 'arabic') return (
+    <div dir="rtl" style={{ padding: '10px 12px', borderRadius: 10, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', fontFamily: 'sans-serif' }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#f59e0b', marginBottom: 8, letterSpacing: 0.5 }}>المحتوى العربي الخليجي — حصري</div>
+      <div style={{ fontSize: 13, color: '#fef3c7', lineHeight: 1.8, marginBottom: 6 }}>
+        أنشئ محتوى تسويقي احترافياً<br/>للسوق الخليجي والعربي
+      </div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {['إنستغرام','واتساب','تويتر','موقع RTL'].map(t => (
+          <span key={t} style={{ fontSize: 10, padding: '2px 8px', borderRadius: 10, background: 'rgba(245,158,11,0.15)', color: '#fcd34d', border: '1px solid rgba(245,158,11,0.2)' }}>{t}</span>
+        ))}
+      </div>
+    </div>
+  );
+
   return null;
 }
 
@@ -143,26 +153,23 @@ export function WelcomeModal() {
   const router = useRouter();
 
   useEffect(() => {
-    // Only skip if user clicked "Never show again"
-    const neverShow = localStorage.getItem(NEVER_SHOW_KEY);
-    if (!neverShow) {
-      setTimeout(() => setVisible(true), 600);
-    }
+    const never = localStorage.getItem(NEVER_KEY);
+    if (!never) setTimeout(() => setVisible(true), 700);
   }, []);
 
-  const close = (goToGenerator = false, neverShow = false) => {
-    if (neverShow) localStorage.setItem(NEVER_SHOW_KEY, 'true');
+  const close = (goTo?: string, never = false) => {
+    if (never) localStorage.setItem(NEVER_KEY, 'true');
     setClosing(true);
     setTimeout(() => {
       setVisible(false);
       setClosing(false);
-      if (goToGenerator) router.push('/generate');
+      if (goTo) router.push(goTo);
     }, 280);
   };
 
   const next = () => {
     if (step < STEPS.length - 1) setStep(s => s + 1);
-    else close(true);
+    else close('/generate');
   };
 
   if (!visible) return null;
@@ -173,98 +180,100 @@ export function WelcomeModal() {
     <div style={{
       position: 'fixed', inset: 0, zIndex: 9999,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(8px)',
+      background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(10px)',
       padding: 20,
-      opacity: closing ? 0 : 1,
-      transition: 'opacity 0.28s ease',
+      opacity: closing ? 0 : 1, transition: 'opacity 0.28s ease',
     }}>
       <div style={{
-        background: 'var(--bg2)',
-        border: '1px solid rgba(99,102,241,0.35)',
-        borderRadius: 24, width: '100%', maxWidth: 460,
-        boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 40px rgba(99,102,241,0.12)',
-        overflow: 'hidden',
-        transform: closing ? 'scale(0.95) translateY(8px)' : 'scale(1) translateY(0)',
+        background: '#0f1120', border: '1px solid rgba(99,102,241,0.3)',
+        borderRadius: 24, width: '100%', maxWidth: 480, overflow: 'hidden',
+        boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 40px rgba(99,102,241,0.1)',
+        transform: closing ? 'scale(0.95) translateY(8px)' : 'scale(1)',
         transition: 'all 0.28s ease',
       }}>
         {/* Progress bar */}
-        <div style={{ height: 3, background: 'var(--border)' }}>
-          <div style={{ height: '100%', background: 'linear-gradient(90deg, #6366f1, #22d3ee)', width: `${progress}%`, transition: 'width 0.4s ease' }} />
+        <div style={{ height: 3, background: '#1e293b' }}>
+          <div style={{
+            height: '100%', background: `linear-gradient(90deg, ${current.badgeColor}, #22d3ee)`,
+            width: `${progress}%`, transition: 'width 0.4s ease',
+          }} />
         </div>
 
-        <div style={{ padding: '24px 24px 20px' }}>
-          {/* Header row */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{
-                width: 42, height: 42, borderRadius: 12,
-                background: 'linear-gradient(135deg, #6366f1, #22d3ee)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
-              }}>{current.emoji}</div>
-              <div>
-                <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--text1)', lineHeight: 1.2 }}>{current.title}</div>
-                <div style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, marginTop: 2 }}>{current.subtitle}</div>
-              </div>
+        {/* What's new badge */}
+        <div style={{
+          padding: '12px 20px 0', display: 'flex',
+          alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 800,
+            background: `${current.badgeColor}20`, color: current.badgeColor,
+            border: `1px solid ${current.badgeColor}40`, letterSpacing: 1,
+          }}>
+            {current.badge}
+          </div>
+          <button onClick={() => close()} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#334155', fontSize: 18, lineHeight: 1 }}>✕</button>
+        </div>
+
+        <div style={{ padding: '16px 24px 20px' }}>
+          {/* Emoji + title */}
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 36, marginBottom: 8 }}>{current.emoji}</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#f1f5f9', lineHeight: 1.2, marginBottom: 4 }}>
+              {current.title}
             </div>
-            <button onClick={() => close(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text3)', fontSize: 18, padding: 4, lineHeight: 1 }}>✕</button>
+            <div style={{ fontSize: 12, fontWeight: 600, color: current.badgeColor }}>
+              {current.subtitle}
+            </div>
           </div>
 
           {/* Description */}
-          <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7, marginBottom: 16 }}>
-            {current.description}
+          <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.75, marginBottom: 14 }}>
+            {current.desc}
           </p>
 
           {/* Visual */}
-          <div style={{ background: 'var(--bg3)', borderRadius: 14, padding: 14, marginBottom: 20, border: '1px solid var(--border)', minHeight: 150 }}>
+          <div style={{
+            background: '#080812', borderRadius: 14, padding: 14,
+            marginBottom: 20, border: '1px solid rgba(255,255,255,0.04)',
+            minHeight: 120,
+          }}>
             <StepVisual visual={current.visual} />
           </div>
 
-          {/* Step dots */}
+          {/* Dots */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 16 }}>
             {STEPS.map((_, i) => (
               <button key={i} onClick={() => setStep(i)} style={{
-                width: i === step ? 22 : 7, height: 7, borderRadius: 4,
-                background: i === step ? '#6366f1' : i < step ? 'rgba(99,102,241,0.4)' : 'var(--border2)',
-                border: 'none', cursor: 'pointer', padding: 0,
-                transition: 'all 0.3s',
+                width: i === step ? 24 : 7, height: 7, borderRadius: 4, border: 'none',
+                cursor: 'pointer', padding: 0, transition: 'all 0.3s',
+                background: i === step ? current.badgeColor : i < step ? `${current.badgeColor}60` : '#1e293b',
               }} />
             ))}
           </div>
 
-          {/* Main buttons */}
+          {/* Buttons */}
           <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-            <button onClick={() => close(true)} style={{
-              flex: 1, padding: '11px', borderRadius: 10,
-              background: 'transparent', border: '1px solid var(--border2)',
-              color: 'var(--text3)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
-            }}>
-              Skip tour
-            </button>
+            <button onClick={() => close('/generate')} style={{
+              flex: 1, padding: '10px', borderRadius: 10, fontSize: 13,
+              background: 'transparent', border: '1px solid #1e293b',
+              color: '#334155', cursor: 'pointer', fontWeight: 500,
+            }}>Skip</button>
             <button onClick={next} style={{
-              flex: 2, padding: '11px', borderRadius: 10,
-              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-              color: 'white', fontSize: 14, fontWeight: 700,
-              border: 'none', cursor: 'pointer',
-              boxShadow: '0 4px 16px rgba(99,102,241,0.3)',
-            }}>
-              {current.cta}
-            </button>
+              flex: 2, padding: '10px', borderRadius: 10, fontSize: 14, fontWeight: 700,
+              background: `linear-gradient(135deg, ${current.badgeColor}, ${current.badgeColor}cc)`,
+              color: 'white', border: 'none', cursor: 'pointer',
+              boxShadow: `0 4px 16px ${current.badgeColor}40`,
+            }}>{current.cta}</button>
           </div>
 
-          {/* Never show again — subtle at bottom */}
+          {/* Never show again */}
           <div style={{ textAlign: 'center' }}>
-            <button
-              onClick={() => close(false, true)}
-              style={{
-                background: 'transparent', border: 'none',
-                cursor: 'pointer', fontSize: 12,
-                color: 'var(--text3)', textDecoration: 'underline',
-                textDecorationStyle: 'dotted', textUnderlineOffset: 3,
-                padding: '4px 8px',
-              }}
-            >
-              Don't show this again
-            </button>
+            <button onClick={() => close('/generate', true)} style={{
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              fontSize: 11, color: '#1e293b', textDecoration: 'underline',
+              textDecorationStyle: 'dotted', textUnderlineOffset: 3,
+            }}>Don't show this again</button>
           </div>
         </div>
       </div>
