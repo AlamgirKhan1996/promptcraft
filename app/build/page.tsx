@@ -1,524 +1,770 @@
 'use client';
 // app/build/page.tsx
-import { useState } from 'react';
+// PromptiFill Website Builder — Lovable-style
+// Fill form → AI builds website → Live preview → Download → Deploy
+
+import { useState, useRef } from 'react';
+import { useSession } from 'next-auth/react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import Link from 'next/link';
 import { BuildPageModal } from '@/components/onboarding/BuildOnboarding';
 
-// ─── YOUR AFFILIATE LINKS ──────────────────────────────
-const NAMECHEAP_AFFILIATE = 'https://namecheap.pxf.io/c/7192894/3861474/5618'; // Replace!
-const HOSTINGER_AFFILIATE  = 'https://hostinger.com/?AFFILIATE=YOUR_ID'; // Replace!
-// ──────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────
+type BuildStep = 'form' | 'building' | 'preview';
 
-interface FormData {
-  siteType: string;
-  stack: string;
-  pages: string;
-  style: string;
-  colors: string;
-  features: string[];
-  description: string;
-  language: string;
-}
-
-const SITE_TYPES = [
-  { id: 'portfolio', label: '👤 Portfolio / Personal Brand' },
-  { id: 'business', label: '💼 Business Landing Page' },
-  { id: 'restaurant', label: '🍽 Restaurant / Cafe' },
-  { id: 'ecommerce', label: '🛒 eCommerce Store' },
-  { id: 'saas', label: '🚀 SaaS Product Page' },
-  { id: 'blog', label: '📝 Blog / Content Site' },
-  { id: 'agency', label: '🎨 Agency Website' },
-  { id: 'arabic', label: '🌍 Arabic / RTL Website' },
+const WEBSITE_TYPES = [
+  { id: 'restaurant', label: 'Restaurant / Cafe', emoji: '🍽️' },
+  { id: 'portfolio',  label: 'Portfolio / Personal', emoji: '👤' },
+  { id: 'business',   label: 'Business Landing Page', emoji: '💼' },
+  { id: 'ecommerce',  label: 'eCommerce Store', emoji: '🛒' },
+  { id: 'saas',       label: 'SaaS Product Page', emoji: '🚀' },
+  { id: 'agency',     label: 'Agency / Studio', emoji: '🎨' },
+  { id: 'gym',        label: 'Gym / Fitness', emoji: '💪' },
+  { id: 'medical',    label: 'Clinic / Medical', emoji: '🏥' },
+  { id: 'arabic',     label: 'Arabic RTL Site', emoji: '🌍' },
+  { id: 'other',      label: 'Custom / Other', emoji: '✦' },
 ];
 
-const STACKS = [
-  { id: 'html', label: '🟡 HTML + CSS (Simplest)' },
-  { id: 'nextjs', label: '⚡ Next.js + Tailwind (Recommended)' },
-  { id: 'react', label: '⚛️ React + CSS' },
-  { id: 'vanilla', label: '🌐 Pure HTML/CSS/JS' },
+const STYLES = [
+  { id: 'dark',    label: 'Dark & Premium',    colors: '#080812 + #6366f1' },
+  { id: 'light',   label: 'Clean & Minimal',   colors: '#ffffff + #3b82f6' },
+  { id: 'luxury',  label: 'Luxury Gold',       colors: '#0a0a0a + #d97706' },
+  { id: 'bold',    label: 'Bold & Colorful',   colors: '#1a1a2e + #e91e63' },
+  { id: 'nature',  label: 'Natural & Fresh',   colors: '#f0fdf4 + #16a34a' },
+  { id: 'arabic',  label: 'Arabic Elegant',    colors: '#0d0d0d + #b45309' },
 ];
-
-const STYLES = ['Minimal & Clean', 'Dark & Premium', 'Bold & Colorful', 'Corporate', 'Arabic RTL', 'Luxury'];
 
 const FEATURES = [
-  'Contact form', 'WhatsApp button', 'Mobile-first',
-  'Arabic/RTL support', 'Dark mode', 'Smooth animations',
-  'SEO optimized', 'Fast loading', 'Google Maps embed',
+  'Mobile Responsive', 'WhatsApp Button', 'Contact Form',
+  'Google Maps', 'Social Media Links', 'Image Gallery',
+  'Booking/Reservation', 'Arabic RTL Support', 'Animations',
+  'Newsletter Signup', 'Testimonials', 'FAQ Section',
 ];
 
-const LANGUAGES = ['English', 'Arabic', 'Bilingual'];
+// ─── Loading screen ───────────────────────────────────
+function BuildingScreen() {
+  const steps = [
+    { icon: '🎨', text: 'Designing your layout...', delay: 0 },
+    { icon: '⚡', text: 'Writing HTML & CSS...', delay: 1.5 },
+    { icon: '✨', text: 'Adding animations...', delay: 3 },
+    { icon: '📱', text: 'Making it responsive...', delay: 4.5 },
+    { icon: '🚀', text: 'Finalizing your website...', delay: 6 },
+  ];
 
-export default function BuildPage() {
-  const [form, setForm] = useState<FormData>({
-    siteType: '', stack: 'nextjs', pages: 'Home, About, Services, Contact',
-    style: 'Minimal & Clean', colors: '', features: ['Mobile-first', 'SEO optimized'],
-    description: '', language: 'English',
-  });
-  const [result, setResult] = useState('');
-  const [generating, setGenerating] = useState(false);
+  return (
+    <div style={{
+      minHeight: '70vh', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      padding: '40px 24px', textAlign: 'center',
+    }}>
+      {/* Animated logo */}
+      <div style={{
+        width: 80, height: 80, borderRadius: 20, marginBottom: 32,
+        background: 'linear-gradient(135deg, #6366f1, #22d3ee)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 36, animation: 'pulse-build 2s ease-in-out infinite',
+        boxShadow: '0 0 40px rgba(99,102,241,0.4)',
+      }}>✦</div>
+
+      <h2 style={{
+        fontSize: 28, fontWeight: 800, color: '#f1f5f9',
+        marginBottom: 12, letterSpacing: -0.5,
+      }}>
+        Building Your Website...
+      </h2>
+      <p style={{ fontSize: 15, color: '#64748b', marginBottom: 48 }}>
+        PromptiFill AI is crafting your complete website. This takes 15-30 seconds.
+      </p>
+
+      {/* Build steps */}
+      <div style={{ width: '100%', maxWidth: 400 }}>
+        {steps.map((step, i) => (
+          <div key={i} style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: '10px 16px', borderRadius: 10, marginBottom: 8,
+            background: 'rgba(99,102,241,0.06)',
+            border: '1px solid rgba(99,102,241,0.12)',
+            animation: `fadeInStep 0.5s ease forwards`,
+            animationDelay: `${step.delay}s`,
+            opacity: 0,
+          }}>
+            <span style={{ fontSize: 18, flexShrink: 0 }}>{step.icon}</span>
+            <span style={{ fontSize: 13, color: '#94a3b8', fontWeight: 500 }}>{step.text}</span>
+            <div style={{
+              marginLeft: 'auto', width: 16, height: 16, borderRadius: '50%',
+              border: '2px solid rgba(99,102,241,0.3)',
+              borderTopColor: '#6366f1',
+              animation: 'spin 0.8s linear infinite',
+              animationDelay: `${step.delay}s`,
+              flexShrink: 0,
+            }} />
+          </div>
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes pulse-build { 0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(99,102,241,0.4)} 50%{transform:scale(1.05);box-shadow:0 0 60px rgba(99,102,241,0.6)} }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        @keyframes fadeInStep { to{opacity:1} }
+      `}</style>
+    </div>
+  );
+}
+
+// ─── Preview panel ────────────────────────────────────
+function PreviewPanel({
+  html, websiteType, brandName, onRebuild, onEdit
+}: {
+  html: string; websiteType: string; brandName: string;
+  onRebuild: () => void; onEdit: () => void;
+}) {
+  const [view, setView] = useState<'preview' | 'code'>('preview');
+  const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [copied, setCopied] = useState(false);
-  const [step, setStep] = useState(1);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const toggleFeature = (f: string) => {
-    setForm(prev => ({
-      ...prev,
-      features: prev.features.includes(f)
-        ? prev.features.filter(x => x !== f)
-        : [...prev.features, f],
-    }));
+  const copyCode = () => {
+    navigator.clipboard.writeText(html);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const generate = async () => {
-    if (!form.siteType || !form.description) return;
-    setGenerating(true);
-    setResult('');
-
-    try {
-      const res = await fetch('/api/generate-prompt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          categoryId: 'coding',
-          inputs: {
-            task: `Build a complete ${form.siteType} website`,
-            language: form.stack,
-            context: `
-Business description: ${form.description}
-Pages needed: ${form.pages}
-Design style: ${form.style}
-Color preferences: ${form.colors || 'modern and professional'}
-Special features: ${form.features.join(', ')}
-Language: ${form.language}
-${form.language !== 'English' ? 'Include full RTL Arabic support' : ''}
-            `.trim(),
-            requirements: `Production-ready, mobile-first, ${form.features.join(', ')}`,
-            level: 'Senior/Production-grade',
-            output: 'Full working code',
-          },
-        }),
-      });
-      const data = await res.json();
-      if (data.prompt) {
-        setResult(data.prompt);
-        setStep(2);
-        setTimeout(() => {
-          document.getElementById('result-section')?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    setGenerating(false);
-  };
-
-  const copy = () => {
-    navigator.clipboard.writeText(result).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
-
-  const inputStyle = {
-    width: '100%', background: 'var(--bg)', border: '1px solid var(--border2)',
-    borderRadius: 10, padding: '11px 14px', color: 'var(--text1)',
-    fontSize: 14, outline: 'none', fontFamily: 'inherit',
+  const downloadCode = () => {
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${brandName.toLowerCase().replace(/\s+/g, '-') || 'my-website'}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      {/* Preview toolbar */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '12px 20px', background: '#0d0d1f',
+        border: '1px solid rgba(99,102,241,0.2)',
+        borderRadius: '16px 16px 0 0', flexWrap: 'wrap', gap: 10,
+      }}>
+        {/* Left: success + brand name */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444' }} />
+            <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#f59e0b' }} />
+            <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#22c55e' }} />
+          </div>
+          <div style={{
+            padding: '4px 12px', borderRadius: 6, fontSize: 12,
+            background: 'rgba(255,255,255,0.06)', color: '#64748b',
+            fontFamily: 'monospace',
+          }}>
+            {brandName.toLowerCase().replace(/\s+/g, '-')}.vercel.app
+          </div>
+          <div style={{
+            padding: '3px 8px', borderRadius: 10, fontSize: 10,
+            fontWeight: 700, background: 'rgba(74,222,128,0.15)',
+            color: '#4ade80', border: '1px solid rgba(74,222,128,0.3)',
+          }}>✓ LIVE</div>
+        </div>
+
+        {/* Center: view tabs */}
+        <div style={{ display: 'flex', gap: 4 }}>
+          {[
+            { id: 'preview', label: '👁 Preview' },
+            { id: 'code',    label: '💻 Code' },
+          ].map(t => (
+            <button key={t.id} onClick={() => setView(t.id as any)} style={{
+              padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+              border: 'none', cursor: 'pointer', transition: 'all 0.2s',
+              background: view === t.id ? 'rgba(99,102,241,0.2)' : 'transparent',
+              color: view === t.id ? '#818cf8' : '#475569',
+            }}>{t.label}</button>
+          ))}
+        </div>
+
+        {/* Right: device + actions */}
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {/* Device switcher */}
+          {view === 'preview' && (
+            <div style={{ display: 'flex', gap: 3 }}>
+              <button onClick={() => setDevice('desktop')} style={{
+                padding: '5px 10px', borderRadius: 7, fontSize: 14, border: 'none',
+                cursor: 'pointer', background: device === 'desktop' ? 'rgba(99,102,241,0.2)' : 'transparent',
+              }}>🖥</button>
+              <button onClick={() => setDevice('mobile')} style={{
+                padding: '5px 10px', borderRadius: 7, fontSize: 14, border: 'none',
+                cursor: 'pointer', background: device === 'mobile' ? 'rgba(99,102,241,0.2)' : 'transparent',
+              }}>📱</button>
+            </div>
+          )}
+
+          <button onClick={copyCode} style={{
+            padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+            border: '1px solid rgba(99,102,241,0.2)',
+            background: copied ? 'rgba(74,222,128,0.12)' : 'rgba(99,102,241,0.08)',
+            color: copied ? '#4ade80' : '#818cf8', cursor: 'pointer',
+          }}>{copied ? '✓ Copied!' : '⎘ Copy'}</button>
+
+          <button onClick={downloadCode} style={{
+            padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+            border: 'none', background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+            color: 'white', cursor: 'pointer',
+          }}>⬇ Download</button>
+
+          <button onClick={onRebuild} style={{
+            padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'transparent', color: '#475569', cursor: 'pointer',
+          }}>🔄 Rebuild</button>
+        </div>
+      </div>
+
+      {/* Preview area */}
+      {view === 'preview' && (
+        <div style={{
+          background: '#1a1a2e',
+          border: '1px solid rgba(99,102,241,0.2)',
+          borderTop: 'none',
+          borderRadius: '0 0 16px 16px',
+          padding: device === 'mobile' ? '20px' : '0',
+          minHeight: 600,
+          display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
+        }}>
+          <iframe
+            ref={iframeRef}
+            srcDoc={html}
+            style={{
+              width: device === 'mobile' ? '390px' : '100%',
+              height: device === 'mobile' ? '700px' : '700px',
+              border: device === 'mobile' ? '8px solid #0f1120' : 'none',
+              borderRadius: device === 'mobile' ? 24 : '0 0 16px 16px',
+              background: 'white',
+              boxShadow: device === 'mobile' ? '0 20px 60px rgba(0,0,0,0.5)' : 'none',
+            }}
+            sandbox="allow-scripts allow-same-origin"
+            title="Website Preview"
+          />
+        </div>
+      )}
+
+      {/* Code area */}
+      {view === 'code' && (
+        <div style={{
+          background: '#060614',
+          border: '1px solid rgba(99,102,241,0.2)',
+          borderTop: 'none', borderRadius: '0 0 16px 16px',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            padding: '10px 16px', background: '#0a0a1e',
+            borderBottom: '1px solid rgba(99,102,241,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span style={{
+                fontSize: 11, padding: '2px 8px', borderRadius: 6,
+                background: 'rgba(255,165,0,0.15)', color: '#fb923c',
+                fontWeight: 700, fontFamily: 'monospace',
+              }}>HTML</span>
+              <span style={{ fontSize: 12, color: '#334155', fontFamily: 'monospace' }}>
+                {brandName.toLowerCase().replace(/\s+/g, '-')}.html
+              </span>
+            </div>
+            <span style={{ fontSize: 11, color: '#334155' }}>
+              {html.split('\n').length} lines · {(html.length / 1024).toFixed(1)} KB
+            </span>
+          </div>
+          <pre style={{
+            margin: 0, padding: '20px', overflowX: 'auto', overflowY: 'auto',
+            maxHeight: 620, fontSize: 12, lineHeight: 1.7,
+            color: '#94a3b8', fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+          }}>
+            {html}
+          </pre>
+        </div>
+      )}
+
+      {/* Deploy instructions */}
+      <div style={{
+        marginTop: 16, padding: '20px 24px', borderRadius: 14,
+        background: 'rgba(99,102,241,0.05)',
+        border: '1px solid rgba(99,102,241,0.15)',
+      }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', marginBottom: 14 }}>
+          🚀 Deploy Your Website — 3 Steps
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+          {[
+            { step: '1', icon: '⬇', title: 'Download Code', desc: 'Click the Download button above', color: '#6366f1' },
+            { step: '2', icon: '🐙', title: 'Push to GitHub', desc: 'Create repo → upload the HTML file', color: '#22d3ee' },
+            { step: '3', icon: '⚡', title: 'Deploy on Vercel', desc: 'Connect GitHub → live in 2 minutes', color: '#4ade80' },
+          ].map(s => (
+            <div key={s.step} style={{
+              padding: '14px 16px', borderRadius: 10,
+              background: `${s.color}08`, border: `1px solid ${s.color}25`,
+              display: 'flex', gap: 10, alignItems: 'flex-start',
+            }}>
+              <div style={{
+                width: 28, height: 28, borderRadius: 8, background: `${s.color}20`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 14, flexShrink: 0, fontWeight: 700, color: s.color,
+              }}>{s.icon}</div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', marginBottom: 3 }}>{s.title}</div>
+                <div style={{ fontSize: 12, color: '#64748b' }}>{s.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 12, fontSize: 12, color: '#334155', textAlign: 'center' }}>
+          Then add a domain from Namecheap for $9/year → Professional website complete! 🎉
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── MAIN PAGE ────────────────────────────────────────
+export default function BuildPage() {
+  const { data: session } = useSession();
+  const plan = (session?.user as any)?.plan ?? 'FREE';
+
+  const [step, setStep] = useState<BuildStep>('form');
+  const [generatedHtml, setGeneratedHtml] = useState('');
+  const [error, setError] = useState('');
+  const [buildTime, setBuildTime] = useState(0);
+
+  // Form state
+  const [websiteType, setWebsiteType] = useState('');
+  const [brandName, setBrandName] = useState('');
+  const [description, setDescription] = useState('');
+  const [pages, setPages] = useState('Home, About, Services, Contact');
+  const [style, setStyle] = useState('dark');
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>(['Mobile Responsive', 'Animations']);
+  const [language, setLanguage] = useState('English');
+
+  const toggleFeature = (f: string) => {
+    setSelectedFeatures(prev =>
+      prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]
+    );
+  };
+
+  const handleBuild = async () => {
+    if (!websiteType || !description || !brandName) {
+      setError('Please fill in: Website type, Brand name, and Description');
+      return;
+    }
+    setError('');
+    setStep('building');
+
+    const startTime = Date.now();
+    try {
+      const selectedStyle = STYLES.find(s => s.id === style);
+      const res = await fetch('/api/build-website', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          websiteType,
+          brandName,
+          description,
+          pages,
+          style: selectedStyle?.label || style,
+          colors: selectedStyle?.colors || '',
+          features: selectedFeatures.join(', '),
+          language,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 429) {
+        setError(data.message || 'Daily limit reached. Upgrade to Pro.');
+        setStep('form');
+        return;
+      }
+
+      if (!res.ok || !data.success) {
+        setError(data.error || 'Failed to build. Please try again.');
+        setStep('form');
+        return;
+      }
+
+      setBuildTime(Date.now() - startTime);
+      setGeneratedHtml(data.html);
+      setStep('preview');
+
+    } catch (e) {
+      setError('Network error. Please check your connection and try again.');
+      setStep('form');
+    }
+  };
+
+  const inputStyle = {
+    width: '100%', padding: '11px 14px', borderRadius: 10,
+    background: '#060614', border: '1px solid rgba(99,102,241,0.2)',
+    color: '#f1f5f9', fontSize: 14, outline: 'none',
+    fontFamily: 'inherit', transition: 'border 0.2s',
+    boxSizing: 'border-box' as const,
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#080812' }}>
       <BuildPageModal />
       <Navbar />
 
-      {/* Hero */}
+      {/* ── HERO ── */}
       <div style={{
-        textAlign: 'center', padding: '60px 24px 50px',
-        background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.12) 0%, transparent 70%)',
+        background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.15) 0%, transparent 70%)',
+        borderBottom: '1px solid rgba(99,102,241,0.12)',
+        padding: '48px 24px 36px', textAlign: 'center',
       }}>
-        {/* Badge */}
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
-          padding: '6px 16px', borderRadius: 30, marginBottom: 20,
+          padding: '5px 14px', borderRadius: 20, marginBottom: 16,
           background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)',
-          fontSize: 13, color: 'var(--accent)', fontWeight: 600,
+          fontSize: 12, color: '#6366f1', fontWeight: 700, textTransform: 'uppercase',
+          letterSpacing: 1,
         }}>
-          🚀 Build With Claude AI — Free
+          🚀 AI Website Builder — Powered by PromptiFill
         </div>
 
-        <h1 style={{ fontSize: 'clamp(28px, 5vw, 52px)', fontWeight: 700, color: 'var(--text1)', lineHeight: 1.15, marginBottom: 18 }}>
-          Build a real website for{' '}
-          <span style={{ background: 'linear-gradient(90deg, #6366f1, #22d3ee)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            $9/year
-          </span>
+        <h1 style={{
+          fontSize: 'clamp(28px, 5vw, 52px)', fontWeight: 900,
+          color: '#f1f5f9', lineHeight: 1.1, marginBottom: 14, letterSpacing: -1,
+        }}>
+          Build a Real Website with AI
+          <span style={{
+            display: 'block', marginTop: 4,
+            background: 'linear-gradient(90deg, #6366f1, #22d3ee)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          }}>In 30 Seconds. For $9/year.</span>
         </h1>
 
-        <p style={{ fontSize: 17, color: 'var(--text2)', maxWidth: 580, margin: '0 auto 16px', lineHeight: 1.7 }}>
-          Stop paying $50/month for website builders.
-          "Generate a perfect prompt → PromptiFill AI builds your website → Deploy free on Vercel → Add a $9 domain. Done."
+        <p style={{
+          fontSize: 16, color: '#64748b', maxWidth: 520, margin: '0 auto 24px', lineHeight: 1.7,
+        }}>
+          Describe your business → PromptiFill AI builds your complete website →
+          Live preview instantly → Download → Deploy free on Vercel
         </p>
 
-        {/* Cost comparison */}
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 40 }}>
+        {/* Compare pills */}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
           {[
-            { label: 'Wix', cost: '$204/year', bad: true },
-            { label: 'Webflow', cost: '$276/year', bad: true },
-            { label: 'This method', cost: '$9/year', bad: false },
-          ].map(item => (
-            <div key={item.label} style={{
-              padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 600,
-              background: item.bad ? 'rgba(239,68,68,0.08)' : 'rgba(74,222,128,0.1)',
-              border: `1px solid ${item.bad ? 'rgba(239,68,68,0.2)' : 'rgba(74,222,128,0.3)'}`,
-              color: item.bad ? '#ef4444' : '#4ade80',
-            }}>
-              {item.bad ? '❌' : '✅'} {item.label}: {item.cost}
-            </div>
-          ))}
-        </div>
-
-        {/* How it works — 4 steps */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, maxWidth: 780, margin: '0 auto' }}>
-          {[
-            { n: '1', icon: '✦', title: 'Generate Prompt', desc: 'Fill 7 blanks → PromptiFill creates your perfect Claude prompt' },
-            { n: '2', icon: '🤖', title: 'Build with Claude', desc: 'Paste prompt into Claude.ai → it writes your complete website' },
-            { n: '3', icon: '⚡', title: 'Deploy Free', desc: 'Push to GitHub → connect Vercel → live in 2 minutes' },
-            { n: '4', icon: '🌐', title: 'Add Domain', desc: 'Buy .com for $9/year from Namecheap → professional URL' },
-          ].map(s => (
-            <div key={s.n} style={{ padding: '18px 16px', background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 14 }}>
-              <div style={{ fontSize: 22, marginBottom: 8 }}>{s.icon}</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text1)', marginBottom: 6 }}>{s.n}. {s.title}</div>
-              <div style={{ fontSize: 12, color: 'var(--text3)', lineHeight: 1.5 }}>{s.desc}</div>
-            </div>
+            { label: '❌ Wix: $204/year', bg: 'rgba(248,113,113,0.1)', color: '#f87171', border: 'rgba(248,113,113,0.2)' },
+            { label: '❌ Webflow: $276/year', bg: 'rgba(248,113,113,0.1)', color: '#f87171', border: 'rgba(248,113,113,0.2)' },
+            { label: '✅ PromptiFill: $9/year', bg: 'rgba(74,222,128,0.1)', color: '#4ade80', border: 'rgba(74,222,128,0.25)' },
+          ].map(p => (
+            <div key={p.label} style={{
+              padding: '7px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600,
+              background: p.bg, color: p.color, border: `1px solid ${p.border}`,
+            }}>{p.label}</div>
           ))}
         </div>
       </div>
 
-      <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 24px 60px' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px 60px' }}>
 
-        {/* FORM */}
-        <div style={{
-          background: 'var(--bg2)', border: '1px solid var(--border)',
-          borderRadius: 20, padding: '32px', marginBottom: 24,
-        }}>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text1)', marginBottom: 24 }}>
-            ✦ Generate Your Website Prompt & build with Promptifill
-          </h2>
+        {/* ── BUILDING SCREEN ── */}
+        {step === 'building' && <BuildingScreen />}
 
-          {/* Site type */}
-          <div style={{ marginBottom: 22 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text2)', marginBottom: 10 }}>
-              What type of website? <span style={{ color: 'var(--accent)' }}>*</span>
-            </label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
-              {SITE_TYPES.map(t => (
-                <button key={t.id} type="button" onClick={() => setForm(f => ({ ...f, siteType: t.id }))}
-                  style={{
-                    padding: '10px 14px', borderRadius: 10, fontSize: 13,
-                    fontWeight: 500, cursor: 'pointer', textAlign: 'left',
-                    border: '1px solid',
-                    borderColor: form.siteType === t.id ? 'rgba(99,102,241,0.5)' : 'var(--border)',
-                    background: form.siteType === t.id ? 'rgba(99,102,241,0.12)' : 'var(--bg3)',
-                    color: form.siteType === t.id ? 'var(--accent)' : 'var(--text2)',
-                    transition: 'all 0.2s',
-                  }}
-                >{t.label}</button>
-              ))}
-            </div>
-          </div>
-
-          {/* Description */}
-          <div style={{ marginBottom: 22 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text2)', marginBottom: 8 }}>
-              Describe your business or project <span style={{ color: 'var(--accent)' }}>*</span>
-            </label>
-            <textarea
-              value={form.description}
-              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-              placeholder="e.g. A Saudi coffee shop in Riyadh called 'Qahwa House' — specialty coffee and light meals, modern Arabic aesthetic, targeting young professionals..."
-              rows={3}
-              style={{ ...inputStyle, resize: 'vertical', minHeight: 80 }}
-            />
-          </div>
-
-          {/* Two column row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 22 }}>
-            <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text2)', marginBottom: 8 }}>
-                Tech stack
-              </label>
-              <select value={form.stack} onChange={e => setForm(f => ({ ...f, stack: e.target.value }))}
-                style={{ ...inputStyle, appearance: 'none' }}>
-                {STACKS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text2)', marginBottom: 8 }}>
-                Pages needed
-              </label>
-              <input type="text" value={form.pages}
-                onChange={e => setForm(f => ({ ...f, pages: e.target.value }))}
-                placeholder="Home, About, Services, Contact"
-                style={inputStyle}
-              />
-            </div>
-          </div>
-
-          {/* Style + Colors */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 22 }}>
-            <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text2)', marginBottom: 8 }}>
-                Design style
-              </label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {STYLES.map(s => (
-                  <button key={s} type="button" onClick={() => setForm(f => ({ ...f, style: s }))}
-                    style={{
-                      padding: '6px 12px', borderRadius: 8, fontSize: 12,
-                      fontWeight: 500, cursor: 'pointer',
-                      border: '1px solid',
-                      borderColor: form.style === s ? 'rgba(99,102,241,0.4)' : 'var(--border)',
-                      background: form.style === s ? 'rgba(99,102,241,0.15)' : 'transparent',
-                      color: form.style === s ? 'var(--accent)' : 'var(--text3)',
-                    }}
-                  >{s}</button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text2)', marginBottom: 8 }}>
-                Color preferences (optional)
-              </label>
-              <input type="text" value={form.colors}
-                onChange={e => setForm(f => ({ ...f, colors: e.target.value }))}
-                placeholder="e.g. Dark green + gold, or open"
-                style={inputStyle}
-              />
-            </div>
-          </div>
-
-          {/* Features */}
-          <div style={{ marginBottom: 22 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text2)', marginBottom: 10 }}>
-              Features to include
-            </label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {FEATURES.map(f => (
-                <button key={f} type="button" onClick={() => toggleFeature(f)}
-                  style={{
-                    padding: '7px 14px', borderRadius: 20, fontSize: 12,
-                    fontWeight: 500, cursor: 'pointer',
-                    border: '1px solid',
-                    borderColor: form.features.includes(f) ? 'rgba(74,222,128,0.4)' : 'var(--border)',
-                    background: form.features.includes(f) ? 'rgba(74,222,128,0.1)' : 'transparent',
-                    color: form.features.includes(f) ? '#4ade80' : 'var(--text3)',
-                  }}
-                >
-                  {form.features.includes(f) ? '✓ ' : ''}{f}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Language */}
-          <div style={{ marginBottom: 28 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text2)', marginBottom: 8 }}>
-              Website language
-            </label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {LANGUAGES.map(l => (
-                <button key={l} type="button" onClick={() => setForm(f => ({ ...f, language: l }))}
-                  style={{
-                    padding: '8px 18px', borderRadius: 8, fontSize: 13,
-                    fontWeight: 500, cursor: 'pointer',
-                    border: '1px solid',
-                    borderColor: form.language === l ? 'rgba(99,102,241,0.4)' : 'var(--border2)',
-                    background: form.language === l ? 'rgba(99,102,241,0.15)' : 'transparent',
-                    color: form.language === l ? 'var(--accent)' : 'var(--text2)',
-                  }}
-                >{l}</button>
-              ))}
-            </div>
-          </div>
-
-          {/* Generate button */}
-          <button
-            onClick={generate}
-            disabled={generating || !form.siteType || !form.description}
-            style={{
-              width: '100%', padding: '16px', borderRadius: 12,
-              fontSize: 16, fontWeight: 700,
-              background: (!form.siteType || !form.description) ? 'var(--bg3)' : 'linear-gradient(135deg, #6366f1, #4f46e5)',
-              color: (!form.siteType || !form.description) ? 'var(--text3)' : 'white',
-              border: 'none', cursor: (!form.siteType || !form.description || generating) ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            }}
-          >
-            {generating ? (
-              <>
-                <span style={{ display: 'inline-block', width: 18, height: 18, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-                Generating your website prompt...
-              </>
-            ) : "✦ Generate & Build My Website"}
-          </button>
-
-          {(!form.siteType || !form.description) && (
-            <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text3)', marginTop: 8 }}>
-              Select a website type and describe your project to continue
-            </p>
-          )}
-        </div>
-
-        {/* RESULT */}
-        {result && (
-          <div id="result-section">
-            {/* Step 1 — The Prompt */}
+        {/* ── PREVIEW SCREEN ── */}
+        {step === 'preview' && generatedHtml && (
+          <div>
+            {/* Success banner */}
             <div style={{
-              background: 'var(--bg2)', border: '1px solid rgba(99,102,241,0.35)',
-              borderRadius: 20, padding: '28px', marginBottom: 16,
-              boxShadow: '0 0 30px rgba(99,102,241,0.08)',
+              padding: '14px 20px', borderRadius: 12, marginBottom: 20,
+              background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.25)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              flexWrap: 'wrap', gap: 10,
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80' }} />
-                  <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text1)' }}>
-                    ✅ Your Claude Prompt Is Ready!
-                  </span>
-                </div>
-                <button onClick={copy} style={{
-                  padding: '8px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                  cursor: 'pointer', border: '1px solid',
-                  borderColor: copied ? 'rgba(74,222,128,0.4)' : 'var(--border2)',
-                  background: copied ? 'rgba(74,222,128,0.1)' : 'var(--bg3)',
-                  color: copied ? '#4ade80' : 'var(--text2)',
-                }}>
-                  {copied ? '✓ Copied!' : '⎘ Copy Prompt'}
-                </button>
-              </div>
-
-              <div style={{
-                background: 'var(--bg)', border: '1px solid var(--border)',
-                borderRadius: 10, padding: 18, fontSize: 13,
-                color: 'var(--text1)', lineHeight: 1.8,
-                whiteSpace: 'pre-wrap', fontFamily: 'monospace',
-                maxHeight: 320, overflowY: 'auto',
-              }}>{result}</div>
-            </div>
-
-            {/* Step 2 — What to do next */}
-            <div style={{
-              background: 'var(--bg2)', border: '1px solid var(--border)',
-              borderRadius: 20, padding: '28px', marginBottom: 16,
-            }}>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text1)', marginBottom: 20 }}>
-                🎯 What To Do Next — 4 Steps
-              </h3>
-
-              {[
-                {
-                  n: '1', color: '#6366f1',
-                  title: 'Paste in Claude.ai',
-                  desc: "PromptiFill AI generates AND runs your website code instantly",
-                  btn: 'Open Claude.ai →',
-                  href: 'https://claude.ai',
-                },
-                {
-                  n: '2', color: '#22d3ee',
-                  title: 'Deploy FREE on Vercel',
-                  desc: 'Save the code Claude gives you → create GitHub repo → connect to Vercel → your site is live in 2 minutes.',
-                  btn: 'Open Vercel →',
-                  href: 'https://vercel.com',
-                },
-                {
-                  n: '3', color: '#4ade80',
-                  title: 'Get a professional domain',
-                  desc: 'Add a .com domain for ~$9/year. Connect to Vercel for free. Professional URL in 30 minutes.',
-                  btn: 'Get Domain on Namecheap →',
-                  href: NAMECHEAP_AFFILIATE,
-                },
-                {
-                  n: '4', color: '#f59e0b',
-                  title: 'Need more prompts?',
-                  desc: 'Generate unlimited website prompts, get Arabic RTL support, and access all 10 categories with Pro.',
-                  btn: 'Upgrade to Pro →',
-                  href: '/pricing',
-                },
-              ].map(step => (
-                <div key={step.n} style={{
-                  display: 'flex', gap: 16, marginBottom: 18, alignItems: 'flex-start',
-                  padding: '16px', borderRadius: 12, background: 'var(--bg3)',
-                  border: '1px solid var(--border)',
-                }}>
-                  <div style={{
-                    width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                    background: `${step.color}20`, border: `2px solid ${step.color}40`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 14, fontWeight: 700, color: step.color,
-                  }}>{step.n}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text1)', marginBottom: 4 }}>{step.title}</div>
-                    <div style={{ fontSize: 13, color: 'var(--text3)', lineHeight: 1.55, marginBottom: 10 }}>{step.desc}</div>
-                    <a href={step.href} target={step.href.startsWith('http') ? '_blank' : undefined}
-                      rel="noopener noreferrer"
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 6,
-                        padding: '8px 16px', borderRadius: 8, fontSize: 13,
-                        fontWeight: 600, textDecoration: 'none',
-                        background: `${step.color}15`, color: step.color,
-                        border: `1px solid ${step.color}30`,
-                      }}
-                    >{step.btn}</a>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 20 }}>🎉</span>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9' }}>
+                    Your website is ready! Built in {(buildTime / 1000).toFixed(1)} seconds.
+                  </div>
+                  <div style={{ fontSize: 12, color: '#64748b' }}>
+                    Download the HTML file → Deploy on Vercel → Add $9 domain
                   </div>
                 </div>
-              ))}
+              </div>
+              <button onClick={() => setStep('form')} style={{
+                padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'transparent', color: '#475569', cursor: 'pointer',
+              }}>
+                ← Build Another
+              </button>
             </div>
 
-            {/* Cost summary */}
-            <div style={{
-              padding: '20px 24px', borderRadius: 14,
-              background: 'rgba(74,222,128,0.07)', border: '1px solid rgba(74,222,128,0.2)',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              flexWrap: 'wrap', gap: 12,
-            }}>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#4ade80', marginBottom: 4 }}>
-                  💰 Total cost for your website
-                </div>
-                <div style={{ fontSize: 13, color: 'var(--text3)' }}>
-                  PromptiFill: Free · Claude: Free · Vercel: Free · Domain: $9/year
-                </div>
-              </div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: '#4ade80' }}>$9/year</div>
-            </div>
+            <PreviewPanel
+              html={generatedHtml}
+              websiteType={websiteType}
+              brandName={brandName}
+              onRebuild={handleBuild}
+              onEdit={() => setStep('form')}
+            />
           </div>
         )}
 
-        {/* SEO content section */}
-        {!result && (
-          <div style={{ marginTop: 40, padding: '28px', background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 16 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text1)', marginBottom: 16 }}>
-              Why this works better than website builders
-            </h2>
-            {[
-              { icon: '💰', title: 'Save $200-270/year', desc: 'Website builders charge $15-50/month. This method costs $9/year total — just the domain.' },
-              { icon: '🎯', title: 'You own the code', desc: 'With website builders, you\'re locked in forever. With this method, you own your code and can move it anywhere.' },
-              { icon: '⚡', title: 'Better performance', desc: 'Custom-built sites on Vercel are faster than drag-and-drop builders. Better SEO. Better user experience.' },
-              { icon: '🌍', title: 'Arabic/RTL support', desc: 'Building an Arabic website? Our prompts include full RTL support — something most builders don\'t handle well.' },
-            ].map(item => (
-              <div key={item.title} style={{ display: 'flex', gap: 14, marginBottom: 16, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 22, flexShrink: 0 }}>{item.icon}</span>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text1)', marginBottom: 3 }}>{item.title}</div>
-                  <div style={{ fontSize: 13, color: 'var(--text3)', lineHeight: 1.55 }}>{item.desc}</div>
+        {/* ── FORM ── */}
+        {step === 'form' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 24 }}>
+
+            {/* Left — Main form */}
+            <div>
+              {/* Error */}
+              {error && (
+                <div style={{
+                  padding: '12px 16px', borderRadius: 10, marginBottom: 16,
+                  background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)',
+                  fontSize: 13, color: '#f87171',
+                }}>⚠️ {error}</div>
+              )}
+
+              {/* Website type */}
+              <div style={{ background: '#0f1120', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 16, padding: 24, marginBottom: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 14 }}>
+                  1. What type of website?
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
+                  {WEBSITE_TYPES.map(t => (
+                    <button key={t.id} onClick={() => setWebsiteType(t.id)} style={{
+                      padding: '12px 10px', borderRadius: 10, cursor: 'pointer',
+                      border: '1px solid',
+                      borderColor: websiteType === t.id ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.06)',
+                      background: websiteType === t.id ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.02)',
+                      color: websiteType === t.id ? '#818cf8' : '#64748b',
+                      fontSize: 13, fontWeight: websiteType === t.id ? 700 : 500,
+                      textAlign: 'center', transition: 'all 0.2s',
+                    }}>
+                      <div style={{ fontSize: 20, marginBottom: 4 }}>{t.emoji}</div>
+                      {t.label}
+                    </button>
+                  ))}
                 </div>
               </div>
-            ))}
+
+              {/* Brand + description */}
+              <div style={{ background: '#0f1120', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 16, padding: 24, marginBottom: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>
+                  2. Tell us about your business
+                </div>
+
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ fontSize: 13, color: '#94a3b8', display: 'block', marginBottom: 7, fontWeight: 500 }}>
+                    Brand / Business Name <span style={{ color: '#6366f1' }}>*</span>
+                  </label>
+                  <input
+                    value={brandName} onChange={e => setBrandName(e.target.value)}
+                    placeholder="e.g. Qahwa House, TechFlow, Dr. Ahmed Clinic"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ fontSize: 13, color: '#94a3b8', display: 'block', marginBottom: 7, fontWeight: 500 }}>
+                    Describe your business <span style={{ color: '#6366f1' }}>*</span>
+                  </label>
+                  <textarea
+                    value={description} onChange={e => setDescription(e.target.value)}
+                    placeholder="e.g. Premium specialty coffee shop in Riyadh targeting young professionals. We serve hand-crafted drinks in a modern luxury setting. Known for our Arabic coffee culture and bilingual service."
+                    rows={4}
+                    style={{ ...inputStyle, resize: 'vertical', minHeight: 100, lineHeight: 1.6 }}
+                  />
+                  <div style={{ fontSize: 11, color: '#334155', marginTop: 5 }}>
+                    The more detail you give → the better the website. Describe your target audience, unique value, and vibe.
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 13, color: '#94a3b8', display: 'block', marginBottom: 7, fontWeight: 500 }}>
+                    Pages / Sections
+                  </label>
+                  <input
+                    value={pages} onChange={e => setPages(e.target.value)}
+                    placeholder="e.g. Home, About, Menu, Gallery, Contact"
+                    style={inputStyle}
+                  />
+                </div>
+              </div>
+
+              {/* Style */}
+              <div style={{ background: '#0f1120', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 16, padding: 24, marginBottom: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 14 }}>
+                  3. Design style
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 8 }}>
+                  {STYLES.map(s => (
+                    <button key={s.id} onClick={() => setStyle(s.id)} style={{
+                      padding: '12px 14px', borderRadius: 10, cursor: 'pointer',
+                      border: '1px solid',
+                      borderColor: style === s.id ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.06)',
+                      background: style === s.id ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.02)',
+                      textAlign: 'left', transition: 'all 0.2s',
+                    }}>
+                      <div style={{ fontSize: 12, fontWeight: style === s.id ? 700 : 500, color: style === s.id ? '#818cf8' : '#64748b', marginBottom: 3 }}>
+                        {s.label}
+                      </div>
+                      <div style={{ fontSize: 10, color: '#334155', fontFamily: 'monospace' }}>{s.colors}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Features */}
+              <div style={{ background: '#0f1120', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 16, padding: 24, marginBottom: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 14 }}>
+                  4. Features to include
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {FEATURES.map(f => {
+                    const selected = selectedFeatures.includes(f);
+                    return (
+                      <button key={f} onClick={() => toggleFeature(f)} style={{
+                        padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 500,
+                        cursor: 'pointer', border: '1px solid', transition: 'all 0.2s',
+                        borderColor: selected ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.06)',
+                        background: selected ? 'rgba(99,102,241,0.12)' : 'transparent',
+                        color: selected ? '#818cf8' : '#475569',
+                      }}>
+                        {selected ? '✓ ' : ''}{f}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Language */}
+              <div style={{ background: '#0f1120', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 16, padding: 24, marginBottom: 24 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 14 }}>
+                  5. Language
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {['English', 'Arabic (RTL)', 'Bilingual (English + Arabic)'].map(l => (
+                    <button key={l} onClick={() => setLanguage(l)} style={{
+                      padding: '9px 18px', borderRadius: 10, cursor: 'pointer',
+                      border: '1px solid', fontSize: 13, fontWeight: 500, transition: 'all 0.2s',
+                      borderColor: language === l ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.06)',
+                      background: language === l ? 'rgba(99,102,241,0.12)' : 'transparent',
+                      color: language === l ? '#818cf8' : '#64748b',
+                    }}>{l}</button>
+                  ))}
+                </div>
+              </div>
+
+              {/* BUILD BUTTON */}
+              <button
+                onClick={handleBuild}
+                disabled={!websiteType || !description || !brandName}
+                style={{
+                  width: '100%', padding: '16px 24px', borderRadius: 14,
+                  border: 'none', cursor: (!websiteType || !description || !brandName) ? 'not-allowed' : 'pointer',
+                  background: (!websiteType || !description || !brandName)
+                    ? 'rgba(99,102,241,0.3)'
+                    : 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                  color: 'white', fontSize: 16, fontWeight: 800,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+                  boxShadow: (!websiteType || !description || !brandName)
+                    ? 'none' : '0 8px 30px rgba(99,102,241,0.35)',
+                  transition: 'all 0.2s',
+                  opacity: (!websiteType || !description || !brandName) ? 0.6 : 1,
+                }}
+              >
+                <span style={{ fontSize: 20 }}>✦</span>
+                Build My Website with PromptiFill AI
+                <span style={{
+                  fontSize: 12, padding: '3px 10px',
+                  background: 'rgba(255,255,255,0.15)', borderRadius: 20,
+                }}>
+                  {plan === 'FREE' ? '2 free builds/day' : 'Unlimited'}
+                </span>
+              </button>
+
+              {plan === 'FREE' && (
+                <p style={{ fontSize: 12, color: '#334155', textAlign: 'center', marginTop: 10 }}>
+                  Free plan: 2 website builds/day · <a href="/pricing" style={{ color: '#6366f1', textDecoration: 'none' }}>Upgrade to Pro for unlimited →</a>
+                </p>
+              )}
+            </div>
+
+            {/* Right — Info sidebar */}
+            <div>
+              {/* What you get */}
+              <div style={{
+                background: '#0f1120', border: '1px solid rgba(99,102,241,0.2)',
+                borderRadius: 16, padding: 20, marginBottom: 16,
+                position: 'sticky', top: 80,
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', marginBottom: 14 }}>
+                  ✦ What PromptiFill AI Builds For You
+                </div>
+
+                {[
+                  { icon: '🎨', text: 'Complete HTML + CSS + JavaScript' },
+                  { icon: '📱', text: 'Fully responsive — mobile perfect' },
+                  { icon: '✨', text: 'Smooth animations & hover effects' },
+                  { icon: '🌍', text: 'Arabic RTL support built in' },
+                  { icon: '🚀', text: 'Ready to deploy on Vercel' },
+                  { icon: '💰', text: '$9 domain = professional URL' },
+                ].map((item, i) => (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '8px 0',
+                    borderBottom: i < 5 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                  }}>
+                    <span style={{ fontSize: 16, flexShrink: 0 }}>{item.icon}</span>
+                    <span style={{ fontSize: 13, color: '#94a3b8' }}>{item.text}</span>
+                  </div>
+                ))}
+
+                <div style={{
+                  marginTop: 16, padding: '12px 14px', borderRadius: 10,
+                  background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)',
+                }}>
+                  <div style={{ fontSize: 12, color: '#4ade80', fontWeight: 700, marginBottom: 4 }}>
+                    Total cost: $9/year
+                  </div>
+                  <div style={{ fontSize: 11, color: '#334155' }}>
+                    vs Wix $204/year · Webflow $276/year
+                  </div>
+                </div>
+              </div>
+
+              {/* Live demos */}
+              <div style={{
+                background: '#0f1120', border: '1px solid rgba(99,102,241,0.15)',
+                borderRadius: 16, padding: 20,
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', marginBottom: 12 }}>
+                  🌐 Real Websites Built With This
+                </div>
+                <a href="https://qahwa-house-six.vercel.app" target="_blank" rel="noopener noreferrer" style={{
+                  display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+                  borderRadius: 10, background: 'rgba(99,102,241,0.06)',
+                  border: '1px solid rgba(99,102,241,0.15)', textDecoration: 'none',
+                  transition: 'all 0.2s', marginBottom: 8,
+                }}>
+                  <span style={{ fontSize: 18 }}>🍵</span>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9' }}>Qahwa House</div>
+                    <div style={{ fontSize: 11, color: '#475569' }}>Saudi coffee brand · Arabic RTL</div>
+                  </div>
+                  <span style={{ marginLeft: 'auto', fontSize: 12, color: '#6366f1' }}>View →</span>
+                </a>
+                <div style={{ fontSize: 11, color: '#334155', textAlign: 'center', marginTop: 8 }}>
+                  Built with PromptiFill · 2 hours · $9 total
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
-
       <Footer />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
