@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
-import { BuildBadge } from '@/components/onboarding/BuildOnboarding';
 
 const navLinks = [
   { href: '/generate', label: '✦ Generator', isBuild: false },
@@ -98,7 +97,7 @@ export function Navbar() {
                 background: pathname === href ? 'rgba(99,102,241,0.12)' : 'transparent',
                 display: 'block', whiteSpace: 'nowrap',
               }}>{label}</Link>
-              {isBuild && <BuildBadge />}
+              
             </div>
           ))}
         </div>
