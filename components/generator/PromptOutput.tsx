@@ -87,7 +87,6 @@ export function PromptOutput({ prompt, score, reason, improvements, generating, 
         <RunResult
           prompt={prompt}
           category={category}
-          promptId={promptId || undefined}
         />
       </div>
 
