@@ -155,8 +155,7 @@ ${form.language !== 'English' ? 'Include full RTL Arabic support' : ''}
 
         <p style={{ fontSize: 17, color: 'var(--text2)', maxWidth: 580, margin: '0 auto 16px', lineHeight: 1.7 }}>
           Stop paying $50/month for website builders.
-          Generate a perfect AI prompt → Claude writes your code →
-          Deploy free on Vercel → Add a $9 domain. Done.
+          "Generate a perfect prompt → PromptiFill AI builds your website → Deploy free on Vercel → Add a $9 domain. Done."
         </p>
 
         {/* Cost comparison */}
@@ -202,7 +201,7 @@ ${form.language !== 'English' ? 'Include full RTL Arabic support' : ''}
           borderRadius: 20, padding: '32px', marginBottom: 24,
         }}>
           <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text1)', marginBottom: 24 }}>
-            ✦ Generate Your Website Prompt
+            ✦ Generate Your Website Prompt & build with Promptifill
           </h2>
 
           {/* Site type */}
@@ -360,7 +359,7 @@ ${form.language !== 'English' ? 'Include full RTL Arabic support' : ''}
                 <span style={{ display: 'inline-block', width: 18, height: 18, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
                 Generating your website prompt...
               </>
-            ) : '✦ Generate My Website Prompt →'}
+            ) : "✦ Generate & Build My Website"}
           </button>
 
           {(!form.siteType || !form.description) && (
@@ -419,7 +418,7 @@ ${form.language !== 'English' ? 'Include full RTL Arabic support' : ''}
                 {
                   n: '1', color: '#6366f1',
                   title: 'Paste in Claude.ai',
-                  desc: 'Copy your prompt above → open Claude.ai → paste it → Claude writes your complete website code.',
+                  desc: "PromptiFill AI generates AND runs your website code instantly",
                   btn: 'Open Claude.ai →',
                   href: 'https://claude.ai',
                 },
