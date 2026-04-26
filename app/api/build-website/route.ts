@@ -260,7 +260,14 @@ Make this website so impressive that when someone sees it they say "WOW — this
 
 The website should feel ALIVE — animated, interactive, professional.
 
-Return ONLY the complete HTML code. Nothing else.`;
+Return ONLY the complete HTML code. Nothing else.
+
+CRITICAL FOR PREVIEW - MUST DO:
+- Set body background-color as INLINE STYLE: style="background:#111827; color:white; margin:0; padding:0; font-family:Arial,sans-serif;"
+- Every section needs explicit background-color in style="" attribute
+- DO NOT rely on Tailwind classes alone for backgrounds
+- Add <style>body,html{background:#111827;margin:0;padding:0;}</style> in head
+- The page must be visible immediately without any JavaScript loading`;
 
     const startTime = Date.now();
 

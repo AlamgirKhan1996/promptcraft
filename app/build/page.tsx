@@ -238,12 +238,25 @@ function PreviewPanel({
           <iframe
             ref={iframeRef}
             srcDoc={html}
+            onLoad = {(e) => {
+              const iframe = e.currentTarget;
+              try {
+                const doc = iframe.contentDocument;
+                if (doc && doc.body) {
+                  if (!doc.body.style.background) {
+                    doc.body.style.background = '#111827';
+                    doc.body.style.color = 'white';
+                  }
+                }
+              } catch (error) {}
+            }}
+            
             style={{
               width: device === 'mobile' ? '390px' : '100%',
               height: device === 'mobile' ? '780px' : '780px',
               border: device === 'mobile' ? '8px solid #0f1120' : 'none',
               borderRadius: device === 'mobile' ? 24 : '0 0 16px 16px',
-              background: 'transparent',
+              background: 'white',
               boxShadow: device === 'mobile' ? '0 20px 60px rgba(0,0,0,0.5)' : 'none',
             }}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-top-navigation-by-user-activation"
