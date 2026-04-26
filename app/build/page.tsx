@@ -213,6 +213,17 @@ function PreviewPanel({
             color: 'white', cursor: 'pointer',
           }}>⬇ Download</button>
 
+          <button onClick={() => {
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}} style={{
+  padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+  border: 'none', background: 'linear-gradient(135deg, #059669, #047857)',
+  color: 'white', cursor: 'pointer',
+}}>👁 Open Preview</button>
+
           <button onClick={onRebuild} style={{
             padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
             border: '1px solid rgba(255,255,255,0.08)',
@@ -223,31 +234,53 @@ function PreviewPanel({
 
       {/* Preview area */}
       {view === 'preview' && (
-        <div style={{
-          background: '#1a1a2e',
-          border: '1px solid rgba(99,102,241,0.2)',
-          borderTop: 'none',
-          borderRadius: '0 0 16px 16px',
-          padding: device === 'mobile' ? '20px' : '0',
-          minHeight: 600,
-          display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
-        }}>
-          <iframe
-            
-            src={previewUrl}
-            style={{
-              width: device === 'mobile' ? '390px' : '100%',
-              height: device === 'mobile' ? '780px' : '780px',
-              border: device === 'mobile' ? '8px solid #0f1120' : 'none',
-              borderRadius: device === 'mobile' ? 24 : '0 0 16px 16px',
-              background: 'transparent',
-              boxShadow: device === 'mobile' ? '0 20px 60px rgba(0,0,0,0.5)' : 'none',
-            }}
-            
-            title="Website Preview"
-          />
-        </div>
-      )}
+  <div style={{
+    background: '#0d1117',
+    border: '1px solid rgba(99,102,241,0.2)',
+    borderTop: 'none',
+    borderRadius: '0 0 16px 16px',
+    minHeight: 500,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    padding: 40,
+  }}>
+    <div style={{ fontSize: 48 }}>🌐</div>
+    <div style={{
+      fontSize: 18, fontWeight: 700,
+      color: '#f1f5f9', textAlign: 'center',
+    }}>
+      Your website is ready!
+    </div>
+    <div style={{
+      fontSize: 14, color: '#64748b',
+      textAlign: 'center', maxWidth: 400, lineHeight: 1.7,
+    }}>
+      Click the button below to see your complete website
+      in a new tab — exactly how your visitors will see it.
+    </div>
+    <button onClick={() => {
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    }} style={{
+      padding: '14px 32px', borderRadius: 12,
+      background: 'linear-gradient(135deg, #059669, #047857)',
+      color: 'white', fontSize: 16, fontWeight: 700,
+      border: 'none', cursor: 'pointer',
+      boxShadow: '0 4px 20px rgba(5,150,105,0.4)',
+      display: 'flex', alignItems: 'center', gap: 10,
+    }}>
+      👁 Open Website Preview →
+    </button>
+    <div style={{ fontSize: 12, color: '#334155' }}>
+      Opens in new tab · Full website · Everything works
+    </div>
+  </div>
+)}
 
       {/* Code area */}
       {view === 'code' && (
