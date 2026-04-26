@@ -46,6 +46,13 @@ export async function POST(req: NextRequest) {
     const accent = accentColors[style] || '#6366f1';
 
     const prompt = `Build a complete professional website. Return ONLY raw HTML code.
+    MOST IMPORTANT - NO EXTERNAL RESOURCES:
+- NO Google Fonts link tags
+- NO Tailwind CDN script tags  
+- NO Bootstrap or any CDN
+- Use ONLY: font-family: Arial, Helvetica, sans-serif
+- ALL colors as inline styles on every element
+- background-color MUST be on body as inline style
 
 Business: ${brandName || 'My Business'}
 Type: ${websiteType}
@@ -74,7 +81,28 @@ Return ONLY the HTML. Nothing else.`;
       messages: [{ role: 'user', content: prompt }],
     });
 
-    let html = response.content[0].type === 'text' ? response.content[0].text : '';
+   const rawCode = response.content[0].type === 'text' ? response.content[0].text : '';
+    let html = rawCode
+  .replace(/^```html\s*/i, '')
+  .replace(/^```\s*/i, '')
+  .replace(/\s*```$/i, '')
+  .trim();
+
+// ✅ Strip ALL external resources
+html = html
+  .replace(/<link[^>]*href=["'][^"']*googleapis[^"']*["'][^>]*\/?>/gi, '')
+  .replace(/<link[^>]*href=["'][^"']*gstatic[^"']*["'][^>]*\/?>/gi, '')
+  .replace(/<link[^>]*href=["'][^"']*cdn[^"']*["'][^>]*\/?>/gi, '')
+  .replace(/<script[^>]*src=["'][^"']*cdn[^"']*["'][^>]*><\/script>/gi, '')
+  .replace(/<script[^>]*src=["'][^"']*googleapis[^"']*["'][^>]*><\/script>/gi, '')
+  .replace(/@import\s+url\(['"]?https?:\/\/[^'")\s]+['"]?\)[^;]*;/gi, '')
+  .replace(/font-family:[^;]*['"]?(Inter|Poppins|Roboto|Montserrat|Lato|Raleway|Nunito|Open Sans|Playfair|Josefin)['"]?[^;]*/gi,
+    'font-family: Arial, Helvetica, sans-serif');
+
+// ✅ Force body background if missing  
+if (!html.match(/<body[^>]*background/i)) {
+  html = html.replace(/<body/i, '<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background-color:#0f1117;color:#f1f5f9;"');
+}
 
     // Clean markdown
     html = html.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
