@@ -378,7 +378,7 @@ export default function BuildPage() {
     setStep('building');
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 55000); 
+    const timeout = setTimeout(() => controller.abort(), 58000); 
 
     const startTime = Date.now();
     try {
