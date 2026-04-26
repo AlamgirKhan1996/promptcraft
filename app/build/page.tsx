@@ -116,11 +116,11 @@ function BuildingScreen() {
 
 // ─── Preview panel ────────────────────────────────────
 function PreviewPanel({
-  html, websiteType, brandName, onRebuild, onEdit
+  html, websiteType, brandName, onRebuild, onEdit, previewUrl
 }: {
   html: string; websiteType: string; brandName: string;
-  onRebuild: () => void; onEdit: () => void;
-}) {
+  onRebuild: () => void; onEdit: () => void; previewUrl: string;
+}){
   const [view, setView] = useState<'preview' | 'code'>('preview');
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [copied, setCopied] = useState(false);
@@ -225,7 +225,39 @@ function PreviewPanel({
       </div>
 
       {/* Preview area */}
-      {view === 'preview' && (<WebsitePreview html={html} device={device} />)}
+      {view === 'preview' && (
+        <div style={{
+          background: '#1a1a2e',
+          border: '1px solid rgba(99,102,241,0.2)',
+          borderTop: 'none',
+          borderRadius: '0 0 16px 16px',
+          padding: device === 'mobile' ? '20px' : '0',
+          minHeight: 600,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+        }}>
+          {previewUrl ? (
+            <iframe
+              src={previewUrl}
+              style={{
+                width: device === 'mobile' ? '390px' : '100%',
+                height: '780px',
+                border: device === 'mobile' ? '10px solid #0f1120' : 'none',
+                borderRadius: device === 'mobile' ? 28 : '0 0 16px 16px',
+                display: 'block',
+              }}
+              title="Website Preview"
+            />
+          ) : (
+            <div style={{
+              padding: 40, textAlign: 'center', color: '#475569', fontSize: 14,
+            }}>
+              Preview loading... Click Code tab to copy HTML manually.
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Code area */}
       {view === 'code' && (
@@ -315,6 +347,7 @@ export default function BuildPage() {
   const [error, setError] = useState('');
   const [buildTime, setBuildTime] = useState(0);
   const [lineCount, setLineCount] = useState(0);
+  const [previewUrl, setPreviewUrl] = useState('');
 
   // Form state
   const [websiteType, setWebsiteType] = useState('');
@@ -377,9 +410,23 @@ export default function BuildPage() {
         return;
       }
 
-      setBuildTime(Date.now() - startTime);
+       setBuildTime(Date.now() - startTime);
       setGeneratedHtml(data.html);
       setLineCount(data.lineCount || 0);
+
+      // Store HTML and get preview URL
+      try {
+        const storeRes = await fetch('/api/preview/store', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ html: data.html }),
+        });
+        const storeData = await storeRes.json();
+        setPreviewUrl(`/api/preview/store?id=${storeData.id}`);
+      } catch {
+        setPreviewUrl('');
+      }
+
       setStep('preview');
 
     } catch (e: any) {
@@ -491,12 +538,13 @@ export default function BuildPage() {
               </button>
             </div>
 
-            <PreviewPanel
+           <PreviewPanel
               html={generatedHtml}
               websiteType={websiteType}
               brandName={brandName}
               onRebuild={handleBuild}
               onEdit={() => setStep('form')}
+              previewUrl={previewUrl}
             />
           </div>
         )}
