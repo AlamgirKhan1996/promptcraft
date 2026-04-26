@@ -7,7 +7,7 @@ import { useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { WebsitePreview} from '@/components/builder/WebsitePreview';
+import Link from 'next/link';
 import { BuildPageModal } from '@/components/onboarding/BuildOnboarding';
 
 // ─── Types ────────────────────────────────────────────
@@ -53,7 +53,6 @@ function BuildingScreen() {
   ];
 
   return (
-    
     <div style={{
       minHeight: '70vh', display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
@@ -75,8 +74,7 @@ function BuildingScreen() {
         Building Your Website...
       </h2>
       <p style={{ fontSize: 15, color: '#64748b', marginBottom: 48 }}>
-        PromptiFill AI is crafting your complete website. 
-        Please wait. This takes 20-40 seconds - AI is building your website...
+        PromptiFill AI is crafting your complete website. This takes 15-30 seconds.
       </p>
 
       {/* Build steps */}
@@ -120,11 +118,10 @@ function PreviewPanel({
 }: {
   html: string; websiteType: string; brandName: string;
   onRebuild: () => void; onEdit: () => void; previewUrl: string;
-}){
+}) {
   const [view, setView] = useState<'preview' | 'code'>('preview');
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [copied, setCopied] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const copyCode = () => {
     navigator.clipboard.writeText(html);
@@ -233,29 +230,22 @@ function PreviewPanel({
           borderRadius: '0 0 16px 16px',
           padding: device === 'mobile' ? '20px' : '0',
           minHeight: 600,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'flex-start',
+          display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
         }}>
-          {previewUrl ? (
-            <iframe
-              src={previewUrl}
-              style={{
-                width: device === 'mobile' ? '390px' : '100%',
-                height: '780px',
-                border: device === 'mobile' ? '10px solid #0f1120' : 'none',
-                borderRadius: device === 'mobile' ? 28 : '0 0 16px 16px',
-                display: 'block',
-              }}
-              title="Website Preview"
-            />
-          ) : (
-            <div style={{
-              padding: 40, textAlign: 'center', color: '#475569', fontSize: 14,
-            }}>
-              Preview loading... Click Code tab to copy HTML manually.
-            </div>
-          )}
+          <iframe
+            
+            src={previewUrl}
+            style={{
+              width: device === 'mobile' ? '390px' : '100%',
+              height: device === 'mobile' ? '780px' : '780px',
+              border: device === 'mobile' ? '8px solid #0f1120' : 'none',
+              borderRadius: device === 'mobile' ? 24 : '0 0 16px 16px',
+              background: 'transparent',
+              boxShadow: device === 'mobile' ? '0 20px 60px rgba(0,0,0,0.5)' : 'none',
+            }}
+            
+            title="Website Preview"
+          />
         </div>
       )}
 
@@ -372,9 +362,6 @@ export default function BuildPage() {
     setError('');
     setStep('building');
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 58000); 
-
     const startTime = Date.now();
     try {
       const selectedStyle = STYLES.find(s => s.id === style);
@@ -391,10 +378,7 @@ export default function BuildPage() {
           features: selectedFeatures.join(', '),
           language,
         }),
-        signal: controller.signal,
       });
-
-      clearTimeout(timeout);
 
       const data = await res.json();
 
@@ -410,11 +394,11 @@ export default function BuildPage() {
         return;
       }
 
-       setBuildTime(Date.now() - startTime);
+      setBuildTime(Date.now() - startTime);
       setGeneratedHtml(data.html);
       setLineCount(data.lineCount || 0);
 
-      // Store HTML and get preview URL
+      // Store HTML and get real preview URL
       try {
         const storeRes = await fetch('/api/preview/store', {
           method: 'POST',
@@ -422,20 +406,17 @@ export default function BuildPage() {
           body: JSON.stringify({ html: data.html }),
         });
         const storeData = await storeRes.json();
-        setPreviewUrl(`/api/preview/store?id=${storeData.id}`);
-      } catch {
-        setPreviewUrl('');
+        if (storeData.id) {
+          setPreviewUrl(`/api/preview/store?id=${storeData.id}`);
+        }
+      } catch (e) {
+        console.error('Preview store error:', e);
       }
 
       setStep('preview');
 
-    } catch (e: any) {
-      clearTimeout(timeout);
-      if (e?.name === 'AbortError') {
-        setError('Build took too long and was aborted. Please try with a simpler description.');
-      } else {
-        setError('Network error. Please check your connection and try again.');
-      }
+    } catch (e) {
+      setError('Network error. Please check your connection and try again.');
       setStep('form');
     }
   };
@@ -538,7 +519,7 @@ export default function BuildPage() {
               </button>
             </div>
 
-           <PreviewPanel
+            <PreviewPanel
               html={generatedHtml}
               websiteType={websiteType}
               brandName={brandName}
