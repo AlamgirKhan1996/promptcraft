@@ -51,13 +51,6 @@ function BuildingScreen() {
     { icon: '📱', text: 'Making it responsive...', delay: 4.5 },
     { icon: '🚀', text: 'Finalizing your website...', delay: 6 },
   ];
-  const [seconds, setSeconds] = useState(0);
-  useState(() => {
-    const timer = setInterval(() => 
-      setSeconds(s => s + 1), 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   return (
     
@@ -66,13 +59,6 @@ function BuildingScreen() {
       alignItems: 'center', justifyContent: 'center',
       padding: '40px 24px', textAlign: 'center',
     }}>
-      <div style={{
-      fontSize: 13, color: '#6366f1', marginTop: 16, fontWeight: 600,
-    }}>
-      Building... {seconds}s
-      {seconds > 20 && '- almost ready!'}
-      {seconds > 35 && '- finalizing...'}
-    </div>
       {/* Animated logo */}
       <div style={{
         width: 80, height: 80, borderRadius: 20, marginBottom: 32,
