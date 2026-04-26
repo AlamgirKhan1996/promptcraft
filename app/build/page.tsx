@@ -75,7 +75,8 @@ function BuildingScreen() {
         Building Your Website...
       </h2>
       <p style={{ fontSize: 15, color: '#64748b', marginBottom: 48 }}>
-        PromptiFill AI is crafting your complete website. This takes 15-30 seconds.
+        PromptiFill AI is crafting your complete website. 
+        Please wait. This takes 20-40 seconds - AI is building your website...
       </p>
 
       {/* Build steps */}
@@ -406,9 +407,9 @@ export default function BuildPage() {
       setLineCount(data.lineCount || 0);
       setStep('preview');
 
-    } catch (e) {
+    } catch (e: any) {
       clearTimeout(timeout);
-      if (e.name === 'AbortError') {
+      if (e?.name === 'AbortError') {
         setError('Build took too long and was aborted. Please try with a simpler description.');
       } else {
         setError('Network error. Please check your connection and try again.');
