@@ -117,7 +117,6 @@ TECHNICAL REQUIREMENTS — ALL MANDATORY
 CSS & STYLING REQUIREMENTS
 ═══════════════════════════════════════════════════
 
-- Use Tailwind CSS via CDN as base
 - ALSO write all critical CSS in <style> tag as backup
 - Every element has explicit background-color (not just Tailwind class)
 - CSS custom properties for colors:
@@ -186,7 +185,6 @@ Add these EXACTLY in <head>:
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:">
-<script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 For Arabic sites also add:
