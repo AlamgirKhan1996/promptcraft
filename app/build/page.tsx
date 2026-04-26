@@ -7,7 +7,7 @@ import { useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import Link from 'next/link';
+import { WebsitePreview} from '@/components/builder/WebsitePreview';
 import { BuildPageModal } from '@/components/onboarding/BuildOnboarding';
 
 // ─── Types ────────────────────────────────────────────
@@ -225,44 +225,7 @@ function PreviewPanel({
       </div>
 
       {/* Preview area */}
-      {view === 'preview' && (
-        <div style={{
-          background: '#1a1a2e',
-          border: '1px solid rgba(99,102,241,0.2)',
-          borderTop: 'none',
-          borderRadius: '0 0 16px 16px',
-          padding: device === 'mobile' ? '20px' : '0',
-          minHeight: 600,
-          display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
-        }}>
-          <iframe
-            ref={iframeRef}
-            srcDoc={html}
-            onLoad = {(e) => {
-              const iframe = e.currentTarget;
-              try {
-                const doc = iframe.contentDocument;
-                if (doc && doc.body) {
-                  if (!doc.body.style.background) {
-                    doc.body.style.background = '#111827';
-                    doc.body.style.color = 'white';
-                  }
-                }
-              } catch (error) {}
-            }}
-            
-            style={{
-              width: device === 'mobile' ? '390px' : '100%',
-              height: device === 'mobile' ? '780px' : '780px',
-              border: device === 'mobile' ? '8px solid #0f1120' : 'none',
-              borderRadius: device === 'mobile' ? 24 : '0 0 16px 16px',
-              background: 'white',
-              boxShadow: device === 'mobile' ? '0 20px 60px rgba(0,0,0,0.5)' : 'none',
-            }}
-            title="Website Preview"
-          />
-        </div>
-      )}
+      {view === 'preview' && (<WebsitePreview html={html} device={device} />)}
 
       {/* Code area */}
       {view === 'code' && (
