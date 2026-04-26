@@ -8,6 +8,9 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Anthropic from '@anthropic-ai/sdk';
 
+export const maxDuration = 60; // Max execution time in seconds for this API route
+export const dynamic = 'force-dynamic'; // Disable caching for dynamic content
+
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
 const BUILD_LIMITS: Record<string, number> = { FREE: 3, PRO: 999, TEAM: 999 };
@@ -263,7 +266,7 @@ Return ONLY the complete HTML code. Nothing else.`;
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
-      max_tokens: 8000, // Maximum for complex fully functional sites
+      max_tokens: 4000, // Maximum for complex fully functional sites
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     });
