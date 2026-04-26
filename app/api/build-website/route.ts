@@ -263,7 +263,7 @@ Return ONLY the complete HTML code. Nothing else.`;
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
-      max_tokens: 16000, // Maximum for complex fully functional sites
+      max_tokens: 8000, // Maximum for complex fully functional sites
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     });

@@ -51,13 +51,28 @@ function BuildingScreen() {
     { icon: '📱', text: 'Making it responsive...', delay: 4.5 },
     { icon: '🚀', text: 'Finalizing your website...', delay: 6 },
   ];
+  const [seconds, setSeconds] = useState(0);
+  useState(() => {
+    const timer = setInterval(() => 
+      setSeconds(s => s + 1), 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   return (
+    
     <div style={{
       minHeight: '70vh', display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
       padding: '40px 24px', textAlign: 'center',
     }}>
+      <div style={{
+      fontSize: 13, color: '#6366f1', marginTop: 16, fontWeight: 600,
+    }}>
+      Building... {seconds}s
+      {seconds > 20 && '- almost ready!'}
+      {seconds > 35 && '- finalizing...'}
+    </div>
       {/* Animated logo */}
       <div style={{
         width: 80, height: 80, borderRadius: 20, marginBottom: 32,
@@ -362,6 +377,9 @@ export default function BuildPage() {
     setError('');
     setStep('building');
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 55000); 
+
     const startTime = Date.now();
     try {
       const selectedStyle = STYLES.find(s => s.id === style);
@@ -378,7 +396,10 @@ export default function BuildPage() {
           features: selectedFeatures.join(', '),
           language,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeout);
 
       const data = await res.json();
 
@@ -400,7 +421,12 @@ export default function BuildPage() {
       setStep('preview');
 
     } catch (e) {
-      setError('Network error. Please check your connection and try again.');
+      clearTimeout(timeout);
+      if (e.name === 'AbortError') {
+        setError('Build took too long and was aborted. Please try with a simpler description.');
+      } else {
+        setError('Network error. Please check your connection and try again.');
+      }
       setStep('form');
     }
   };
