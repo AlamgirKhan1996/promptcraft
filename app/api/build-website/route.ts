@@ -1,19 +1,14 @@
 // app/api/build-website/route.ts
-// PromptiFill Website Builder — FULLY FUNCTIONAL
-// Generates complete SPA websites with working navigation, forms, animations
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Anthropic from '@anthropic-ai/sdk';
 
-export const maxDuration = 60; // Max execution time in seconds for this API route
-export const dynamic = 'force-dynamic'; // Disable caching for dynamic content
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
-
-const BUILD_LIMITS: Record<string, number> = { FREE: 3, PRO: 999, TEAM: 999 };
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,297 +19,202 @@ export async function POST(req: NextRequest) {
     }) : null;
     const plan = dbUser?.plan ?? 'FREE';
 
-    const { websiteType, description, pages, style, colors, features, language, brandName } = await req.json();
+    const {
+      websiteType, description, pages,
+      style, features, language, brandName,
+    } = await req.json();
 
     if (!description || !websiteType) {
-      return NextResponse.json({ error: 'Description and website type are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Description and website type are required' },
+        { status: 400 }
+      );
     }
 
-    // ── MASTER SYSTEM PROMPT — FULLY FUNCTIONAL ────────────────────────────
-    const systemPrompt = `You are a world-class senior full-stack developer who builds FULLY FUNCTIONAL, production-ready single-page web applications.
-
-You build websites that are COMPLETELY INTERACTIVE — every button works, every page loads, every form validates, every animation runs.
-
-═══════════════════════════════════════════════════
-TECHNICAL REQUIREMENTS — ALL MANDATORY
-═══════════════════════════════════════════════════
-
-1. SINGLE-FILE SPA ARCHITECTURE:
-   - One HTML file that works like a multi-page app
-   - JavaScript-powered routing: show/hide sections on nav click
-   - Browser history API for real URL-like navigation
-   - Active nav state updates automatically
-   - Smooth page transitions (fade in/out between pages)
-
-2. FULLY WORKING NAVIGATION:
-   - Desktop nav with all links working
-   - Mobile hamburger menu (opens/closes with animation)
-   - Active page highlighted in nav
-   - Smooth scroll to sections when clicking nav
-   - Back to top button (appears after scroll)
-   - Logo click goes to home
-
-3. FULLY WORKING FORMS:
-   - Contact form with real validation
-   - Show error messages for empty/invalid fields
-   - Show success message with animation after submit
-   - Email format validation
-   - Phone number validation if present
-   - WhatsApp form opens whatsapp.me link
-   - Booking forms show confirmation
-
-4. FULLY WORKING BUTTONS:
-   - CTA buttons scroll to contact section
-   - WhatsApp buttons open wa.me link
-   - Social media buttons open links
-   - Gallery/portfolio item expand on click
-   - "Read more" toggles expand/collapse
-   - Pricing buttons scroll to contact/checkout
-   - Menu items in restaurants show details on click
-   - Service cards expand on click
-
-5. ANIMATIONS & INTERACTIONS:
-   - Intersection Observer: elements fade in as user scrolls
-   - Counter animation for stats (0 to final number)
-   - Typing effect for main headline
-   - Parallax on hero background
-   - Smooth hover effects on all cards
-   - Image zoom on hover for gallery
-   - Accordion for FAQ section
-   - Tab switching for services/features
-   - Testimonial carousel/slider (auto-play + manual)
-   - Image lightbox for gallery
-
-6. MOBILE FULLY RESPONSIVE:
-   - Hamburger menu with slide-down animation
-   - Touch-friendly buttons (min 44px tap targets)
-   - Swipe support for carousels on mobile
-   - Mobile-specific layouts
-   - No horizontal scroll
-
-7. HEADER/NAVBAR:
-   - Transparent header that becomes solid on scroll
-   - Box shadow appears on scroll
-   - Shrinks slightly on scroll (professional feel)
-   - Sticky positioning
-   - Works on both mobile and desktop
-
-8. LOADING & PERFORMANCE:
-   - Page loader animation when site first loads (2 seconds then fades)
-   - Lazy-load images with blur-up effect
-   - Smooth 60fps animations using CSS transforms
-
-9. PROFESSIONAL FEATURES:
-   - Toast notifications for actions
-   - Cookie consent banner (if needed)
-   - Scroll progress bar at top of page
-   - Dark/light mode toggle (if appropriate)
-   - Search functionality for menus/services
-   - Filter buttons for portfolio/gallery
-   - Live character counter on forms
-
-═══════════════════════════════════════════════════
-CSS & STYLING REQUIREMENTS
-═══════════════════════════════════════════════════
-
-- ALSO write all critical CSS in <style> tag as backup
-- Every element has explicit background-color (not just Tailwind class)
-- CSS custom properties for colors:
-  :root { --primary: #color; --bg: #color; etc. }
-- CSS animations: @keyframes for all moving elements
-- Smooth transitions: transition: all 0.3s ease
-- Glass morphism effects where appropriate
-- Gradient text effects for headings
-- Box shadows for depth
-- Border radius consistency
-
-═══════════════════════════════════════════════════
-JAVASCRIPT ARCHITECTURE
-═══════════════════════════════════════════════════
-
-Organize JavaScript like this:
-
-// 1. State management
-const state = { currentPage: 'home', menuOpen: false, ... };
-
-// 2. Router
-function navigate(page) { ... hide/show sections, update nav ... }
-
-// 3. Component functions
-function initNavbar() { ... }
-function initForms() { ... }
-function initAnimations() { ... }
-function initCarousel() { ... }
-function initCounter() { ... }
-function initGallery() { ... }
-function initAccordion() { ... }
-function initTabs() { ... }
-
-// 4. Event listeners
-function bindEvents() { ... }
-
-// 5. Init
-document.addEventListener('DOMContentLoaded', function() {
-  initNavbar();
-  initForms();
-  initAnimations();
-  initCarousel();
-  initCounter();
-  bindEvents();
-});
-
-═══════════════════════════════════════════════════
-CONTENT REQUIREMENTS
-═══════════════════════════════════════════════════
-
-- Use REAL, SPECIFIC content that matches the business
-- Real phone numbers format: +966 XX XXX XXXX (Saudi)
-- Real address format for the city mentioned
-- Real business hours
-- Real social media links (use # as href)
-- Real menu items with SAR prices (for restaurants)
-- Real service descriptions with specific details
-- Real testimonials that sound authentic
-- Real team member names appropriate to the region
-
-═══════════════════════════════════════════════════
-IFRAME COMPATIBILITY — CRITICAL
-═══════════════════════════════════════════════════
-
-Add these EXACTLY in <head>:
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-For Arabic sites also add:
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-And on <body> ALWAYS add:
-style="background-color: #YOUR_BG_COLOR; color: #YOUR_TEXT_COLOR; margin:0; font-family:'Inter',sans-serif;"
-
-═══════════════════════════════════════════════════
-OUTPUT RULES
-═══════════════════════════════════════════════════
-
-1. Return ONLY the complete HTML — no explanations, no markdown
-2. Start with <!DOCTYPE html> — nothing before it
-3. End with </html> — nothing after it
-4. Minimum 500 lines of code
-5. Make it BEAUTIFUL and IMPRESSIVE
-6. Every feature must actually WORK when clicked`;
-
-    // ── USER PROMPT ────────────────────────────────────────────────────────
-    const isArabic = language?.toLowerCase().includes('arabic');
+    const isArabic    = language?.toLowerCase().includes('arabic');
     const isBilingual = language?.toLowerCase().includes('bilingual');
 
-    const userPrompt = `Build a FULLY FUNCTIONAL, production-ready website with these specifications:
+    // ── Pick colors from style ──────────────────────────
+    const styleMap: Record<string, { bg: string; bg2: string; text: string; accent: string }> = {
+      dark:   { bg: '#0f1117', bg2: '#1a1a2e', text: '#f1f5f9', accent: '#6366f1' },
+      light:  { bg: '#ffffff', bg2: '#f8fafc', text: '#1e293b', accent: '#3b82f6' },
+      luxury: { bg: '#0a0a0a', bg2: '#111111', text: '#fef3c7', accent: '#d97706' },
+      bold:   { bg: '#1a1a2e', bg2: '#12122e', text: '#f1f5f9', accent: '#e91e63' },
+      nature: { bg: '#f0fdf4', bg2: '#dcfce7', text: '#14532d', accent: '#16a34a' },
+      arabic: { bg: '#0d0d0d', bg2: '#111111', text: '#fef3c7', accent: '#b45309' },
+    };
+    const c = styleMap[style] || styleMap.dark;
 
-WEBSITE TYPE: ${websiteType}
-BRAND NAME: ${brandName || 'My Business'}
-DESCRIPTION: ${description}
-PAGES/SECTIONS: ${pages || 'Home, About, Services, Contact'}
-DESIGN STYLE: ${style || 'Dark & Premium'}
-COLOR SCHEME: ${colors || 'Dark navy #080812 with indigo #6366f1 accent'}
-SPECIAL FEATURES NEEDED: ${features || 'Mobile responsive, animations, working contact form, WhatsApp button'}
-LANGUAGE: ${language || 'English'}
+    // ── System prompt ───────────────────────────────────
+    const systemPrompt = `You are a world-class senior web developer.
+Build beautiful, complete, single-file HTML websites.
+
+══════════════════════════════════════
+NON-NEGOTIABLE RULES — FOLLOW EXACTLY
+══════════════════════════════════════
+
+RULE 1 — OUTPUT:
+Return ONLY the raw HTML code.
+Nothing before <!DOCTYPE html>.
+Nothing after </html>.
+No markdown. No explanation. No code fences.
+
+RULE 2 — ZERO EXTERNAL URLS:
+- NO Google Fonts links
+- NO Tailwind CDN script
+- NO Bootstrap CDN
+- NO any external link or script at all
+- System fonts ONLY: Arial, Helvetica, sans-serif
+
+RULE 3 — ALL CSS INLINE:
+Write every CSS rule inside a <style> tag in <head>.
+Use CSS custom properties:
+:root {
+  --bg: ${c.bg};
+  --bg2: ${c.bg2};
+  --text: ${c.text};
+  --accent: ${c.accent};
+}
+
+RULE 4 — BODY BACKGROUND:
+The <body> tag MUST have this exact inline style:
+style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background-color:${c.bg};color:${c.text};"
+
+RULE 5 — EVERY SECTION:
+Every <section>, <div>, <header>, <footer>
+must have background-color in its style attribute.
+Never rely on CSS class alone for backgrounds.
+
+RULE 6 — CSP META:
+Add exactly this in <head>:
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:;">
+
+══════════════════════════════════════
+FEATURES TO INCLUDE
+══════════════════════════════════════
+
+1. Sticky navbar — transparent → solid on scroll
+2. Mobile hamburger menu — JS open/close animation
+3. Hero section — gradient background, headline, CTA button
+4. Smooth scroll to sections
+5. IntersectionObserver fade-in animations
+6. Contact form — JS validation, success message
+7. WhatsApp button — href="https://wa.me/966500000000"
+8. Counter animation for stats
+9. FAQ accordion — click to expand/collapse
+10. Testimonials section
+11. Back to top button
+12. Footer with links and copyright
+13. All JavaScript in one <script> tag before </body>
 
 ${isArabic ? `
-ARABIC REQUIREMENTS:
-- Set dir="rtl" on <html> tag
-- All content in Arabic only
-- Font: Noto Sans Arabic
-- RTL layout for everything
-- Arabic-appropriate content and style
+ARABIC RULES:
+- <html dir="rtl" lang="ar">
+- All content in Arabic
+- text-align: right on body
+- Margins and paddings flipped for RTL
 ` : ''}
 
 ${isBilingual ? `
-BILINGUAL REQUIREMENTS:
-- Language toggle button in header (EN | عربي)
-- JavaScript toggles between English and Arabic content
-- dir="rtl" applied to body when Arabic is active
-- All text elements have data-en and data-ar attributes
-- Smooth transition when switching languages
-` : ''}
+BILINGUAL RULES:
+- Language toggle button: EN | عربي
+- All text elements: data-en="English text" data-ar="Arabic text"
+- JS function toggleLanguage() switches all text and dir attribute
+` : ''}`;
 
-SPECIFIC JAVASCRIPT FEATURES TO INCLUDE:
-1. Working multi-page navigation (SPA routing)
-2. Mobile hamburger menu with animation
-3. Contact form with full validation + success message
-4. WhatsApp button (wa.me link) 
-5. Scroll animations (fade in elements as they appear)
-6. Counter animation for stats
-7. Testimonials carousel/slider
-8. FAQ accordion
-9. Sticky navbar that changes on scroll
-10. Back to top button
-11. Page loader animation
-12. Gallery with lightbox if ${websiteType === 'restaurant' || websiteType === 'agency' || websiteType === 'gym' ? 'YES - include it' : 'applicable'}
-${features?.includes('Booking') ? '13. Booking form with date picker and time slots' : ''}
-${features?.includes('Arabic RTL Support') || isArabic ? '13. RTL layout support' : ''}
-${isBilingual ? '13. Full language switcher EN/AR' : ''}
+    // ── User prompt ─────────────────────────────────────
+    const userPrompt = `Build a stunning website with these details:
 
-Make this website so impressive that when someone sees it they say "WOW — this looks like a $5000 website!"
+Business Type: ${websiteType}
+Brand Name: ${brandName || 'My Business'}
+Description: ${description}
+Pages/Sections: ${pages || 'Home, About, Services, Contact'}
+Design Colors: bg=${c.bg} text=${c.text} accent=${c.accent}
+Features: ${features || 'Mobile responsive, animations, WhatsApp button, contact form'}
+Language: ${language || 'English'}
 
-The website should feel ALIVE — animated, interactive, professional.
+REMEMBER:
+- body style MUST start with: background-color:${c.bg};color:${c.text};
+- NO external links or scripts of any kind
+- ALL CSS in <style> tag only
+- Make it genuinely beautiful and impressive
+- Real content relevant to the business
+- SAR pricing if restaurant in Saudi Arabia
+- Phone format: +966 5X XXX XXXX
 
-Return ONLY the complete HTML code. Nothing else.
+Return ONLY the HTML. Start with <!DOCTYPE html>.`;
 
-CRITICAL FOR PREVIEW - MUST DO:
-- Set body background-color as INLINE STYLE: style="background:#111827; color:white; margin:0; padding:0; font-family:Arial,sans-serif;"
-- Every section needs explicit background-color in style="" attribute
-- DO NOT rely on Tailwind classes alone for backgrounds
-- Add <style>body,html{background:#111827;margin:0;padding:0;}</style> in head
-- The page must be visible immediately without any JavaScript loading`;
-
-    const startTime = Date.now();
-
+    // ── Call Claude ─────────────────────────────────────
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
-      max_tokens: 4000, // Maximum for complex fully functional sites
+      max_tokens: 6000,
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     });
 
-    const rawCode = response.content[0].type === 'text' ? response.content[0].text : '';
+    let html = response.content[0].type === 'text'
+      ? response.content[0].text : '';
 
-    // Clean markdown if added
-    let htmlCode = rawCode
-      .replace(/^```html\n?/i, '')
-      .replace(/^```\n?/i, '')
-      .replace(/\n?```$/i, '')
+    // ── Strip markdown fences if Claude added them ──────
+    html = html
+      .replace(/^```html\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/\s*```$/i, '')
       .trim();
 
-    // Force CSP meta tag if missing
-    if (!htmlCode.includes('Content-Security-Policy')) {
-      htmlCode = htmlCode.replace(
-        '<head>',
-        `<head>\n<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:">`
+    // ── Remove any external URLs Claude snuck in ────────
+    html = html
+      .replace(/<link[^>]*googleapis\.com[^>]*>/gi, '')
+      .replace(/<link[^>]*gstatic\.com[^>]*>/gi, '')
+      .replace(/<link[^>]*tailwindcss[^>]*>/gi, '')
+      .replace(/<script[^>]*tailwindcss[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<script[^>]*cloudflare[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<script[^>]*jsdelivr[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<script[^>]*unpkg[^>]*>[\s\S]*?<\/script>/gi, '');
+
+    // ── Replace web fonts with system fonts ─────────────
+    html = html
+      .replace(/font-family:\s*['"]?(Inter|Poppins|Roboto|Montserrat|Lato|Raleway|Nunito|Open Sans)['"]?/gi,
+        "font-family: Arial, Helvetica, sans-serif");
+
+    // ── Force body background if missing ────────────────
+    if (!html.includes(`background-color:${c.bg}`) && !html.includes(`background: ${c.bg}`)) {
+      html = html.replace(
+        /<body([^>]*)>/i,
+        `<body$1 style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background-color:${c.bg};color:${c.text};">`
       );
     }
 
-    if (!htmlCode.includes('<!DOCTYPE') && !htmlCode.includes('<html')) {
-      return NextResponse.json({ error: 'Failed to generate valid website. Please add more details and try again.' }, { status: 500 });
+    // ── Force CSP meta ───────────────────────────────────
+    if (!html.includes('Content-Security-Policy')) {
+      html = html.replace(
+        '<head>',
+        `<head>\n  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:;">`
+      );
     }
 
-    const executionTime = Date.now() - startTime;
-    const tokensUsed = response.usage.input_tokens + response.usage.output_tokens;
-    const lineCount = htmlCode.split('\n').length;
+    // ── Validate ─────────────────────────────────────────
+    if (!html.includes('<!DOCTYPE') || !html.includes('<html')) {
+      return NextResponse.json(
+        { error: 'Generation failed. Please try again.' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      html: htmlCode,
-      tokensUsed,
-      executionTime,
-      lineCount,
+      html,
+      tokensUsed: response.usage.input_tokens + response.usage.output_tokens,
+      executionTime: Date.now(),
+      lineCount: html.split('\n').length,
       websiteType,
       brandName,
     });
 
   } catch (error: any) {
-    console.error('Build website error:', error);
-    if (error?.status === 529) return NextResponse.json({ error: 'AI is busy. Please try again in a moment.' }, { status: 503 });
-    if (error?.status === 400) return NextResponse.json({ error: 'Request too large. Please simplify your description.' }, { status: 400 });
+    console.error('Build error:', error);
+    if (error?.status === 529)
+      return NextResponse.json({ error: 'AI is busy. Try again in a moment.' }, { status: 503 });
     return NextResponse.json({ error: 'Failed to build. Please try again.' }, { status: 500 });
   }
 }
