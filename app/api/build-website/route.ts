@@ -14,6 +14,10 @@ export const dynamic = 'force-dynamic';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
+// ── In-memory store for guest rate limiting ───────────
+// Resets when server restarts — good enough for guests
+const guestBuilds = new Map<string, { count: number; time: number }>();
+
 // ── Color palettes ─────────────────────────────────────
 const PALETTES: Record<string, {
   bg: string; bg2: string; bg3: string; nav: string;
@@ -68,25 +72,43 @@ export async function POST(req: NextRequest) {
     }) : null;
     const plan = dbUser?.plan ?? 'FREE';
 
-    // ── Rate limiting for ALL users ─────────────────────
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ||
-               req.headers.get('x-real-ip') || 'unknown';
-    const trackId = userId || ('ip_' + ip);
-    const today = new Date(); today.setHours(0, 0, 0, 0);
+    // ── Rate limiting ─────────────────────────────────────
+    const ip = (req.headers.get('x-forwarded-for') || 'unknown').split(',')[0].trim();
 
-    const buildsToday = await prisma.promptRun.count({
-      where: { userId: trackId, category: 'website_build', createdAt: { gte: today } },
-    });
-
-    const limit = userId ? (plan === 'FREE' ? 2 : 999) : 1;
-
-    if (buildsToday >= limit) {
-      return NextResponse.json({
-        error: 'daily_limit',
-        message: userId
-          ? 'Free plan includes 2 website builds per day. Upgrade to Pro for unlimited.'
-          : 'Sign in free to get 2 builds per day. Pro plan = unlimited.',
-      }, { status: 429 });
+    if (userId) {
+      // Logged in user - check DB
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const buildsToday = await prisma.promptRun.count({
+        where: { userId, category: 'website_build', createdAt: { gte: today } },
+      });
+      const limit = plan === 'FREE' ? 2 : 999;
+      if (buildsToday >= limit) {
+        return NextResponse.json({
+          error: 'daily_limit',
+          message: plan === 'FREE'
+            ? 'You have used your 2 free builds today. Upgrade to Pro for unlimited builds!'
+            : 'Daily limit reached. Please try again tomorrow.',
+          showUpgrade: plan === 'FREE',
+        }, { status: 429 });
+      }
+    } else {
+      // Guest user - check in-memory store
+      const now = Date.now();
+      const key = 'ip_' + ip;
+      const entry = guestBuilds.get(key);
+      if (entry && now - entry.time < 86400000 && entry.count >= 1) {
+        return NextResponse.json({
+          error: 'daily_limit',
+          message: 'Create a free account to get 2 builds per day. Takes 10 seconds!',
+          showLogin: true,
+        }, { status: 429 });
+      }
+      // Update guest count
+      if (entry && now - entry.time < 86400000) {
+        guestBuilds.set(key, { count: entry.count + 1, time: entry.time });
+      } else {
+        guestBuilds.set(key, { count: 1, time: now });
+      }
     }
 
     const { websiteType, description, pages, style, features, language, brandName } = await req.json();
@@ -671,18 +693,20 @@ Return ONLY a JSON object (no markdown, no explanation):
 </body>
 </html>`;
 
-    // ── Save to DB for rate limiting (ALL users including guests) ──
-    await prisma.promptRun.create({
-      data: {
-        userId: trackId,
-        prompt: `Website: ${brandName} - ${websiteType}`,
-        result: html.substring(0, 500),
-        category: 'website_build',
-        tokensUsed: contentRes.usage.input_tokens + contentRes.usage.output_tokens,
-        executionTime: 0,
-        plan: userId ? plan : 'FREE',
-      },
-    });
+    // ── Save to DB (only for logged in users) ───────────
+    if (userId) {
+      await prisma.promptRun.create({
+        data: {
+          userId,
+          prompt: `Website: ${brandName} - ${websiteType}`,
+          result: html.substring(0, 500),
+          category: 'website_build',
+          tokensUsed: contentRes.usage.input_tokens + contentRes.usage.output_tokens,
+          executionTime: 0,
+          plan,
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -694,9 +718,20 @@ Return ONLY a JSON object (no markdown, no explanation):
     });
 
   } catch (error: any) {
-    console.error('Build error:', error);
-    if (error?.status === 529)
-      return NextResponse.json({ error: 'AI is busy. Try again.' }, { status: 503 });
-    return NextResponse.json({ error: 'Failed to build. Please try again.' }, { status: 500 });
+    console.error('Build error:', error?.message || error);
+
+    // Prisma foreign key error
+    if (error?.code === 'P2003' || error?.code === 'P2002') {
+      return NextResponse.json({ error: 'Database error. Please sign in and try again.' }, { status: 500 });
+    }
+    // AI overloaded
+    if (error?.status === 529) {
+      return NextResponse.json({ error: 'AI is busy right now. Please wait 30 seconds and try again.' }, { status: 503 });
+    }
+    // Timeout
+    if (error?.code === 'ECONNRESET' || error?.message?.includes('timeout')) {
+      return NextResponse.json({ error: 'Request timed out. Try a shorter description.' }, { status: 504 });
+    }
+    return NextResponse.json({ error: 'Build failed. Please try again in a moment.' }, { status: 500 });
   }
 }
