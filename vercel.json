@@ -1,10 +1,7 @@
 {
     "functions": {
-        "app/api/run-prompt/route.js": {
+        "app/api/build-website/route.js": {
             "maxDuration": 60
-        },
-        "app/api/run-prompt/route.ts": {
-            "maxDuration": 30
         }
     }
 
