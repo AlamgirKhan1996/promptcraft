@@ -373,7 +373,7 @@ export default function BuildPage() {
           brandName,
           description,
           pages,
-          style: selectedStyle?.label || style,
+          style: style,
           colors: selectedStyle?.colors || '',
           features: selectedFeatures.join(', '),
           language,

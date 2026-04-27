@@ -224,277 +224,318 @@ Return ONLY a JSON object (no markdown, no explanation):
       };
     }
 
-    // ── STEP 2: Build the HTML ourselves with guaranteed colors ──
+    // ── STEP 2: Build luxury HTML with guaranteed colors ────
     const dir = isRTL ? 'rtl' : 'ltr';
     const textAlign = isRTL ? 'right' : 'left';
+    const waNum = content.whatsapp || '966500000000';
+    const emoji = websiteType === 'restaurant' ? '🍽️' : websiteType === 'gym' ? '💪' : websiteType === 'medical' ? '🏥' : websiteType === 'saas' ? '🚀' : websiteType === 'agency' ? '🎨' : websiteType === 'portfolio' ? '👤' : '✦';
 
     const html = `<!DOCTYPE html>
 <html lang="${isArabic ? 'ar' : 'en'}" dir="${dir}">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${content.brand || brandName}</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: ${c.bg};
-      --bg2: ${c.bg2};
-      --bg3: ${c.bg3};
-      --nav: ${c.nav};
-      --text: ${c.text};
-      --text2: ${c.text2};
-      --text3: ${c.text3};
-      --accent: ${c.accent};
-      --accent2: ${c.accent2};
-      --btn: ${c.btn};
-      --btnText: ${c.btnText};
-      --border: ${c.border};
-      --card: ${c.card};
-    }
-    html, body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-      min-height: 100vh;
-      text-align: ${textAlign};
-    }
-    a { color: var(--accent); text-decoration: none; }
-    /* NAVBAR */
-    nav {
-      background-color: var(--nav);
-      padding: 16px 24px;
-      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-      display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 2px 20px rgba(0,0,0,0.3);
-      transition: all 0.3s;
-    }
-    .nav-logo { font-size: 20px; font-weight: 900; color: var(--accent); }
-    .nav-links { display: flex; gap: 28px; list-style: none; }
-    .nav-links a { color: var(--text2); font-size: 14px; font-weight: 500; transition: color 0.2s; }
-    .nav-links a:hover { color: var(--accent); }
-    .nav-btn { background: var(--btn); color: var(--btnText); padding: 8px 20px; border-radius: 8px; font-weight: 700; font-size: 14px; }
-    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; }
-    .hamburger span { width: 24px; height: 2px; background: var(--text); display: block; transition: all 0.3s; }
-    .mobile-menu { display: none; background: var(--nav); padding: 16px 24px; position: fixed; top: 62px; left: 0; right: 0; z-index: 999; border-bottom: 1px solid var(--border); }
-    .mobile-menu a { display: block; padding: 10px 0; color: var(--text2); font-size: 15px; border-bottom: 1px solid var(--border); }
-    .mobile-menu.open { display: block; }
-    /* HERO */
-    .hero {
-      min-height: 100vh; display: flex; align-items: center; justify-content: center;
-      text-align: center; padding: 120px 24px 60px;
-      background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 50%, var(--bg) 100%);
-      position: relative; overflow: hidden;
-    }
-    .hero::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse 80% 60% at 50% 50%, ${c.accent}20 0%, transparent 70%);
-    }
-    .hero-content { position: relative; max-width: 700px; }
-    .hero-badge {
-      display: inline-block; background: ${c.accent}20; border: 1px solid ${c.accent}40;
-      color: var(--accent); font-size: 12px; font-weight: 700; padding: 5px 16px;
-      border-radius: 20px; margin-bottom: 20px; letter-spacing: 1px; text-transform: uppercase;
-    }
-    .hero h1 { font-size: clamp(28px, 5vw, 56px); font-weight: 900; color: var(--text); line-height: 1.1; margin-bottom: 18px; letter-spacing: -1px; }
-    .hero h1 span { color: var(--accent); }
-    .hero p { font-size: 18px; color: var(--text2); margin-bottom: 32px; line-height: 1.7; }
-    .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-    .btn-primary { background: var(--btn); color: var(--btnText); padding: 14px 32px; border-radius: 10px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 20px ${c.accent}40; transition: all 0.3s; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px ${c.accent}50; }
-    .btn-secondary { background: transparent; color: var(--text); padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; border: 1px solid var(--border); cursor: pointer; transition: all 0.3s; }
-    /* SECTIONS */
-    section { padding: 80px 24px; }
-    .container { max-width: 1100px; margin: 0 auto; }
-    .section-label { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
-    .section-title { font-size: clamp(24px, 4vw, 40px); font-weight: 800; color: var(--text); margin-bottom: 14px; letter-spacing: -0.5px; }
-    .section-sub { font-size: 16px; color: var(--text2); max-width: 600px; line-height: 1.7; margin-bottom: 48px; }
-    /* STATS */
-    .stats-section { background-color: var(--bg2); }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 24px; }
-    .stat-card { text-align: center; padding: 32px 16px; background: var(--card); border-radius: 16px; border: 1px solid var(--border); }
-    .stat-number { font-size: 42px; font-weight: 900; color: var(--accent); margin-bottom: 6px; }
-    .stat-label { font-size: 14px; color: var(--text2); }
-    /* SERVICES */
-    .services-section { background-color: var(--bg); }
-    .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-    .service-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-      padding: 28px 24px; transition: all 0.3s;
-    }
-    .service-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 12px 40px ${c.accent}20; }
-    .service-icon { font-size: 36px; margin-bottom: 14px; }
-    .service-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-    .service-desc { font-size: 14px; color: var(--text2); line-height: 1.7; }
-    /* ABOUT */
-    .about-section { background-color: var(--bg2); }
-    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
-    .about-visual {
-      background: linear-gradient(135deg, var(--accent)20, var(--accent2)20);
-      border: 1px solid var(--border); border-radius: 20px;
-      height: 320px; display: flex; align-items: center; justify-content: center;
-      font-size: 80px;
-    }
-    .about-text p { font-size: 15px; color: var(--text2); line-height: 1.85; margin-bottom: 20px; }
-    /* WHY US */
-    .whyus-section { background-color: var(--bg); }
-    .whyus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
-    .whyus-card { padding: 24px; background: var(--card); border-radius: 14px; border: 1px solid var(--border); display: flex; gap: 14px; align-items: flex-start; }
-    .whyus-icon { font-size: 28px; flex-shrink: 0; }
-    .whyus-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-    .whyus-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
-    /* TESTIMONIALS */
-    .testimonials-section { background-color: var(--bg2); }
-    .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-    .testimonial-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
-    .testimonial-text { font-size: 14px; color: var(--text2); line-height: 1.8; margin-bottom: 16px; font-style: italic; }
-    .testimonial-name { font-size: 14px; font-weight: 700; color: var(--text); }
-    .testimonial-role { font-size: 12px; color: var(--text3); }
-    .stars { color: #f59e0b; font-size: 14px; margin-bottom: 10px; }
-    /* FAQ */
-    .faq-section { background-color: var(--bg); }
-    .faq-item { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
-    .faq-q { padding: 16px 20px; cursor: pointer; font-weight: 600; color: var(--text); display: flex; justify-content: space-between; align-items: center; background: var(--card); }
-    .faq-a { padding: 0 20px; max-height: 0; overflow: hidden; transition: all 0.3s; font-size: 14px; color: var(--text2); line-height: 1.7; background: var(--bg2); }
-    .faq-a.open { padding: 16px 20px; max-height: 200px; }
-    /* CONTACT */
-    .contact-section { background-color: var(--bg2); }
-    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
-    .contact-info { display: flex; flex-direction: column; gap: 16px; }
-    .contact-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); }
-    .contact-item-icon { font-size: 20px; }
-    .contact-item-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
-    .contact-item-value { font-size: 14px; font-weight: 600; color: var(--text); }
-    .contact-form { display: flex; flex-direction: column; gap: 14px; }
-    .form-input, .form-textarea {
-      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px 16px; color: var(--text); font-size: 14px; font-family: Arial, sans-serif;
-      width: 100%; outline: none; transition: border 0.2s;
-    }
-    .form-input:focus, .form-textarea:focus { border-color: var(--accent); }
-    .form-textarea { resize: vertical; min-height: 100px; }
-    .form-error { font-size: 12px; color: #f87171; margin-top: -8px; display: none; }
-    .form-success { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); border-radius: 10px; padding: 16px; color: #4ade80; font-weight: 600; display: none; text-align: center; }
-    .form-btn { background: var(--btn); color: var(--btnText); padding: 13px; border-radius: 10px; font-weight: 700; font-size: 15px; border: none; cursor: pointer; transition: all 0.3s; }
-    .form-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-    /* WHATSAPP */
-    .whatsapp-float {
-      position: fixed; bottom: 24px; ${isRTL ? 'left' : 'right'}: 24px;
-      width: 56px; height: 56px; border-radius: 50%;
-      background: #25d366; color: white; font-size: 28px;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 20px rgba(37,211,102,0.5); z-index: 9999;
-      text-decoration: none; transition: all 0.3s; animation: pulse-wa 2s infinite;
-    }
-    .whatsapp-float:hover { transform: scale(1.1); }
-    /* FOOTER */
-    footer { background-color: var(--nav); padding: 40px 24px 24px; border-top: 1px solid var(--border); }
-    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-    .footer-logo { font-size: 18px; font-weight: 900; color: var(--accent); }
-    .footer-text { font-size: 13px; color: var(--text3); }
-    .footer-copy { font-size: 12px; color: var(--text3); text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); max-width: 1100px; margin: 24px auto 0; }
-    /* BACK TO TOP */
-    .back-top {
-      position: fixed; bottom: 90px; ${isRTL ? 'left' : 'right'}: 24px;
-      width: 40px; height: 40px; border-radius: 50%;
-      background: var(--accent); color: white; font-size: 18px;
-      display: none; align-items: center; justify-content: center;
-      cursor: pointer; z-index: 999; border: none; box-shadow: 0 4px 14px ${c.accent}40;
-    }
-    .back-top.show { display: flex; }
-    /* FADE IN */
-    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
-    .fade-in.visible { opacity: 1; transform: translateY(0); }
-    /* ANIMATIONS */
-    @keyframes pulse-wa { 0%,100%{box-shadow:0 4px 20px rgba(37,211,102,0.5)} 50%{box-shadow:0 4px 40px rgba(37,211,102,0.8)} }
-    /* SCROLL PROGRESS */
-    .scroll-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); z-index: 9999; transition: width 0.1s; }
-    /* RESPONSIVE */
-    @media (max-width: 768px) {
-      .nav-links, .nav-btn { display: none; }
-      .hamburger { display: flex; }
-      .about-grid, .contact-grid { grid-template-columns: 1fr; }
-      .hero h1 { font-size: 28px; }
-      .hero p { font-size: 15px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${content.brand || brandName}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:${c.bg};--bg2:${c.bg2};--bg3:${c.bg3};--nav:${c.nav};
+  --text:${c.text};--text2:${c.text2};--text3:${c.text3};
+  --accent:${c.accent};--accent2:${c.accent2};--btn:${c.btn};--btnText:${c.btnText};
+  --border:${c.border};--card:${c.card};
+}
+html,body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;scroll-behavior:smooth;overflow-x:hidden;}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px;}
+/* SCROLL PROGRESS */
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:9999;transition:width 0.1s;width:0%;}
+/* NAVBAR */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:68px;background:${c.nav}dd;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:all 0.4s;}
+nav.scrolled{height:58px;background:${c.nav}f5;box-shadow:0 4px 30px rgba(0,0,0,0.3);}
+.logo{font-size:20px;font-weight:900;color:var(--accent);letter-spacing:-0.5px;display:flex;align-items:center;gap:8px;}
+.logo span{background:var(--accent);color:var(--btnText);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.nav-links{display:flex;gap:32px;list-style:none;align-items:center;}
+.nav-links a{color:var(--text2);font-size:14px;font-weight:500;transition:color 0.2s;position:relative;}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--accent);transition:width 0.3s;}
+.nav-links a:hover{color:var(--accent);}
+.nav-links a:hover::after{width:100%;}
+.nav-cta{background:linear-gradient(135deg,var(--btn),var(--accent2)20);color:var(--btnText);padding:9px 22px;border-radius:25px;font-weight:700;font-size:13px;border:1px solid var(--accent);transition:all 0.3s;white-space:nowrap;}
+.nav-cta:hover{transform:translateY(-2px);box-shadow:0 6px 20px var(--accent)40;}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;}
+.hamburger span{width:22px;height:2px;background:var(--text);display:block;transition:all 0.3s;border-radius:2px;}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+.mobile-menu{display:none;position:fixed;top:68px;left:0;right:0;background:var(--nav)f8;backdrop-filter:blur(20px);z-index:999;padding:20px 5%;border-bottom:1px solid var(--border);transform:translateY(-10px);opacity:0;transition:all 0.3s;}
+.mobile-menu.open{display:block;transform:translateY(0);opacity:1;}
+.mobile-menu a{display:block;padding:12px 0;color:var(--text2);font-size:15px;border-bottom:1px solid var(--border);}
+.mobile-menu a:last-child{border:none;color:var(--accent);font-weight:700;}
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;padding:100px 5% 60px;position:relative;overflow:hidden;background:var(--bg);}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 70% at 50% -20%,${c.accent}25 0%,transparent 60%);pointer-events:none;}
+.hero-orb1{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,${c.accent}15,transparent 70%);top:-100px;right:-100px;animation:float1 8s ease-in-out infinite;}
+.hero-orb2{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,${c.accent2}10,transparent 70%);bottom:-50px;left:-50px;animation:float2 10s ease-in-out infinite;}
+.hero-content{max-width:720px;position:relative;z-index:1;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:${c.accent}15;border:1px solid ${c.accent}40;color:var(--accent);font-size:12px;font-weight:700;padding:6px 16px;border-radius:25px;margin-bottom:24px;letter-spacing:1px;text-transform:uppercase;}
+.hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse-dot 2s infinite;}
+.hero h1{font-size:clamp(32px,5.5vw,64px);font-weight:900;line-height:1.08;letter-spacing:-2px;margin-bottom:20px;color:var(--text);}
+.hero h1 .accent{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:clamp(15px,2vw,18px);color:var(--text2);line-height:1.75;margin-bottom:36px;max-width:560px;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--btn),var(--btn)dd);color:var(--btnText);padding:14px 32px;border-radius:50px;font-weight:700;font-size:15px;border:none;cursor:pointer;box-shadow:0 8px 30px ${c.accent}40;transition:all 0.3s;position:relative;overflow:hidden;}
+.btn-primary::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,white10,transparent);opacity:0;transition:opacity 0.3s;}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 14px 40px ${c.accent}50;}
+.btn-primary:hover::after{opacity:1;}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--text);padding:14px 28px;border-radius:50px;font-weight:600;font-size:15px;border:1px solid var(--border);cursor:pointer;transition:all 0.3s;}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:${c.accent}10;}
+.hero-trust{display:flex;align-items:center;gap:16px;margin-top:36px;flex-wrap:wrap;}
+.trust-avatars{display:flex;}
+.trust-avatar{width:36px;height:36px;border-radius:50%;border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:16px;margin-left:-10px;background:var(--card);}
+.trust-avatar:first-child{margin-left:0;}
+.trust-text{font-size:13px;color:var(--text3);}
+.trust-text strong{color:var(--accent);}
+/* STATS */
+.stats{padding:60px 5%;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.stats-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:24px;}
+.stat-item{text-align:center;padding:24px 16px;background:var(--card);border-radius:16px;border:1px solid var(--border);transition:all 0.3s;}
+.stat-item:hover{border-color:var(--accent);transform:translateY(-4px);}
+.stat-num{font-size:40px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.stat-lbl{font-size:13px;color:var(--text3);font-weight:500;}
+/* SECTIONS GENERAL */
+section{padding:100px 5%;}
+.container{max-width:1100px;margin:0 auto;}
+.section-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;}
+.section-tag::before{content:'';width:20px;height:2px;background:var(--accent);}
+.section-h{font-size:clamp(26px,4vw,44px);font-weight:900;color:var(--text);letter-spacing:-1px;line-height:1.15;margin-bottom:14px;}
+.section-sub{font-size:16px;color:var(--text2);line-height:1.8;max-width:580px;margin-bottom:56px;}
+/* SERVICES */
+.services-bg{background:var(--bg);}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
+.service-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px 28px;transition:all 0.4s;position:relative;overflow:hidden;cursor:pointer;}
+.service-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,${c.accent}08,transparent);opacity:0;transition:opacity 0.4s;}
+.service-card:hover{border-color:var(--accent);transform:translateY(-6px);box-shadow:0 20px 50px ${c.accent}20;}
+.service-card:hover::before{opacity:1;}
+.service-icon-wrap{width:56px;height:56px;border-radius:16px;background:${c.accent}15;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:18px;transition:all 0.3s;}
+.service-card:hover .service-icon-wrap{background:var(--accent);transform:scale(1.1);}
+.service-t{font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.service-d{font-size:14px;color:var(--text2);line-height:1.75;}
+.service-arrow{position:absolute;bottom:24px;right:24px;font-size:18px;color:var(--accent);opacity:0;transform:translateX(-8px);transition:all 0.3s;}
+.service-card:hover .service-arrow{opacity:1;transform:translateX(0);}
+/* ABOUT */
+.about-bg{background:var(--bg2);}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;}
+.about-visual-wrap{position:relative;}
+.about-visual{background:linear-gradient(135deg,${c.accent}20,${c.accent2}15);border:1px solid var(--border);border-radius:28px;height:380px;display:flex;align-items:center;justify-content:center;font-size:90px;position:relative;overflow:hidden;}
+.about-visual::after{content:'';position:absolute;bottom:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:${c.accent}20;border:1px solid ${c.accent}30;}
+.about-badge{position:absolute;bottom:24px;left:24px;background:var(--nav)ee;backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px;}
+.about-badge-icon{font-size:22px;}
+.about-badge-text{font-size:12px;color:var(--text2);}
+.about-badge-num{font-size:16px;font-weight:900;color:var(--accent);}
+.about-text .section-sub{margin-bottom:28px;}
+.about-features{display:flex;flex-direction:column;gap:12px;margin-bottom:32px;}
+.about-feature{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text2);}
+.about-feature::before{content:'✓';width:22px;height:22px;border-radius:50%;background:${c.accent}20;color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+/* WHY US */
+.whyus-bg{background:var(--bg);}
+.whyus-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;}
+.whyus-card{padding:28px 24px;background:var(--card);border-radius:18px;border:1px solid var(--border);display:flex;gap:16px;align-items:flex-start;transition:all 0.3s;}
+.whyus-card:hover{border-color:var(--accent);box-shadow:0 10px 30px ${c.accent}15;transform:translateY(-3px);}
+.whyus-icon{font-size:30px;flex-shrink:0;width:52px;height:52px;background:${c.accent}12;border-radius:14px;display:flex;align-items:center;justify-content:center;}
+.whyus-t{font-size:15px;font-weight:700;color:var(--text);margin-bottom:5px;}
+.whyus-d{font-size:13px;color:var(--text2);line-height:1.7;}
+/* TESTIMONIALS */
+.testi-bg{background:var(--bg2);}
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
+.testi-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;position:relative;transition:all 0.3s;}
+.testi-card::before{content:'"';position:absolute;top:16px;right:20px;font-size:60px;color:${c.accent}20;font-family:Georgia,serif;line-height:1;}
+.testi-card:hover{border-color:var(--accent);transform:translateY(-4px);}
+.testi-stars{color:#f59e0b;font-size:14px;margin-bottom:12px;letter-spacing:2px;}
+.testi-text{font-size:14px;color:var(--text2);line-height:1.85;margin-bottom:20px;font-style:italic;}
+.testi-author{display:flex;align-items:center;gap:12px;}
+.testi-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;color:white;font-weight:700;flex-shrink:0;}
+.testi-name{font-size:14px;font-weight:700;color:var(--text);}
+.testi-role{font-size:12px;color:var(--text3);}
+/* FAQ */
+.faq-bg{background:var(--bg);}
+.faq-wrap{max-width:720px;margin:0 auto;}
+.faq-item{margin-bottom:10px;border-radius:14px;overflow:hidden;border:1px solid var(--border);transition:border-color 0.3s;}
+.faq-item.active{border-color:var(--accent);}
+.faq-q{padding:18px 22px;cursor:pointer;font-weight:600;font-size:14px;color:var(--text);display:flex;justify-content:space-between;align-items:center;background:var(--card);transition:all 0.3s;gap:16px;}
+.faq-q:hover{color:var(--accent);}
+.faq-icon{width:28px;height:28px;border-radius:50%;background:${c.accent}15;color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:300;flex-shrink:0;transition:all 0.3s;}
+.faq-item.active .faq-icon{background:var(--accent);color:white;transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 0.4s ease,padding 0.3s;background:var(--bg2);font-size:14px;color:var(--text2);line-height:1.8;padding:0 22px;}
+.faq-a.open{max-height:200px;padding:16px 22px;}
+/* CONTACT */
+.contact-bg{background:var(--bg2);}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;}
+.contact-info{display:flex;flex-direction:column;gap:16px;}
+.contact-card{display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--card);border-radius:14px;border:1px solid var(--border);transition:all 0.3s;}
+.contact-card:hover{border-color:var(--accent);}
+.contact-icon{width:44px;height:44px;border-radius:12px;background:${c.accent}15;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.contact-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
+.contact-val{font-size:14px;font-weight:600;color:var(--text);}
+.wa-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:15px;border-radius:14px;background:linear-gradient(135deg,#25d366,#128c7e);color:white;font-weight:700;font-size:15px;text-decoration:none;transition:all 0.3s;margin-top:4px;}
+.wa-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,211,102,0.4);}
+/* FORM */
+.form{display:flex;flex-direction:column;gap:14px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-input,.form-textarea{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 16px;color:var(--text);font-size:14px;font-family:Arial,sans-serif;width:100%;outline:none;transition:all 0.3s;}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--text3);}
+.form-input:focus,.form-textarea:focus{border-color:var(--accent);background:${c.accent}08;box-shadow:0 0 0 3px ${c.accent}15;}
+.form-textarea{resize:vertical;min-height:110px;line-height:1.6;}
+.form-err{font-size:11px;color:#f87171;margin-top:-8px;display:none;}
+.form-err.show{display:block;}
+.form-success{background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);border-radius:12px;padding:16px;color:#4ade80;font-weight:600;display:none;text-align:center;margin-bottom:10px;}
+.form-success.show{display:block;}
+.submit-btn{background:linear-gradient(135deg,var(--btn),var(--btn)cc);color:var(--btnText);padding:14px;border-radius:12px;font-weight:700;font-size:15px;border:none;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px ${c.accent}40;}
+/* WHATSAPP FLOAT */
+.wa-float{position:fixed;bottom:28px;${isRTL ? 'left' : 'right'}:28px;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#25d366,#128c7e);color:white;font-size:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(37,211,102,0.5);z-index:9999;text-decoration:none;transition:all 0.3s;animation:wa-pulse 3s infinite;}
+.wa-float:hover{transform:scale(1.12);box-shadow:0 10px 32px rgba(37,211,102,0.7);}
+.wa-tooltip{position:absolute;${isRTL ? 'left' : 'right'}:70px;background:var(--nav);color:var(--text);font-size:12px;font-weight:600;white-space:nowrap;padding:6px 12px;border-radius:8px;border:1px solid var(--border);opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.wa-float:hover .wa-tooltip{opacity:1;}
+/* BACK TO TOP */
+.back-top{position:fixed;bottom:100px;${isRTL ? 'left' : 'right'}:28px;width:42px;height:42px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all 0.3s;z-index:998;}
+.back-top.show{display:flex;}
+.back-top:hover{background:var(--accent);color:white;border-color:var(--accent);}
+/* FOOTER */
+footer{background:var(--nav);padding:56px 5% 28px;border-top:1px solid var(--border);}
+.footer-inner{max-width:1100px;margin:0 auto;}
+.footer-top{display:flex;justify-content:space-between;align-items:flex-start;gap:40px;flex-wrap:wrap;margin-bottom:40px;padding-bottom:40px;border-bottom:1px solid var(--border);}
+.footer-brand .logo{margin-bottom:12px;}
+.footer-brand p{font-size:13px;color:var(--text3);max-width:260px;line-height:1.7;}
+.footer-links h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;text-transform:uppercase;letter-spacing:1px;}
+.footer-links ul{list-style:none;}
+.footer-links ul li{margin-bottom:8px;}
+.footer-links ul li a{font-size:13px;color:var(--text3);transition:color 0.2s;}
+.footer-links ul li a:hover{color:var(--accent);}
+.footer-copy{text-align:center;font-size:12px;color:var(--text3);}
+/* FADE IN */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:none;}
+.reveal-left{opacity:0;transform:translateX(-32px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal-left.visible{opacity:1;transform:none;}
+.reveal-right{opacity:0;transform:translateX(32px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal-right.visible{opacity:1;transform:none;}
+/* ANIMATIONS */
+@keyframes float1{0%,100%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(20px,-20px) rotate(5deg)}}
+@keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-15px,15px)}}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+@keyframes wa-pulse{0%,100%{box-shadow:0 6px 24px rgba(37,211,102,0.5)}50%{box-shadow:0 6px 40px rgba(37,211,102,0.8)}}
+@keyframes count-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* RESPONSIVE */
+@media(max-width:900px){
+  .about-grid,.contact-grid{grid-template-columns:1fr;}
+  .form-row{grid-template-columns:1fr;}
+  .hero h1{letter-spacing:-1px;}
+  .footer-top{flex-direction:column;}
+}
+@media(max-width:768px){
+  .nav-links,.nav-cta{display:none;}
+  .hamburger{display:flex;}
+  section{padding:70px 5%;}
+  .hero{padding:90px 5% 50px;}
+}
+</style>
 </head>
 <body>
 
-<!-- Scroll progress bar -->
-<div class="scroll-bar" id="scrollBar"></div>
+<div id="progress-bar"></div>
 
-<!-- WhatsApp floating button -->
-<a href="https://wa.me/${content.whatsapp || '966500000000'}" class="whatsapp-float" target="_blank">💬</a>
-
-<!-- Back to top -->
+<!-- WhatsApp Float -->
+<a href="https://wa.me/${waNum}" class="wa-float" target="_blank">
+  💬
+  <span class="wa-tooltip">Chat on WhatsApp</span>
+</a>
 <button class="back-top" id="backTop">↑</button>
 
 <!-- NAVBAR -->
 <nav id="navbar">
-  <div class="nav-logo">✦ ${content.brand || brandName}</div>
+  <div class="logo">
+    <span>${emoji}</span>
+    ${content.brand || brandName}
+  </div>
   <ul class="nav-links">
-    ${(content.navLinks || ['Home', 'About', 'Services', 'Contact']).map((link: string) =>
-      `<li><a href="#${link.toLowerCase()}">${link}</a></li>`
+    ${(content.navLinks || ['Home','About','Services','Contact']).map((l: string) =>
+      `<li><a href="#${l.toLowerCase().replace(/\s+/g,'-')}">${l}</a></li>`
     ).join('')}
   </ul>
-  <a href="https://wa.me/${content.whatsapp || '966500000000'}" class="nav-btn" target="_blank">WhatsApp</a>
-  <button class="hamburger" id="hamburger">
+  <a href="https://wa.me/${waNum}" class="nav-cta" target="_blank">💬 WhatsApp</a>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
 </nav>
-
-<!-- Mobile menu -->
 <div class="mobile-menu" id="mobileMenu">
-  ${(content.navLinks || ['Home', 'About', 'Services', 'Contact']).map((link: string) =>
-    `<a href="#${link.toLowerCase()}" onclick="closeMobile()">${link}</a>`
+  ${(content.navLinks || ['Home','About','Services','Contact']).map((l: string) =>
+    `<a href="#${l.toLowerCase().replace(/\s+/g,'-')}" onclick="closeMenu()">${l}</a>`
   ).join('')}
-  <a href="https://wa.me/${content.whatsapp || '966500000000'}" target="_blank" style="color:var(--accent);font-weight:700;">💬 WhatsApp</a>
+  <a href="https://wa.me/${waNum}" target="_blank" onclick="closeMenu()">💬 WhatsApp</a>
 </div>
 
 <!-- HERO -->
 <section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-orb1"></div>
+  <div class="hero-orb2"></div>
   <div class="hero-content">
-    <div class="hero-badge">✦ ${content.tagline || 'Welcome'}</div>
-    <h1>${content.heroTitle || `Welcome to ${brandName}`}</h1>
-    <p>${content.heroSubtitle || description}</p>
+    <div class="hero-badge">
+      <span></span>
+      ${content.tagline || 'Premium ' + websiteType}
+    </div>
+    <h1>
+      ${(content.heroTitle || 'Welcome to ' + brandName).replace(
+        /^(\S+)/,
+        '<span class="accent">$1</span>'
+      )}
+    </h1>
+    <p class="hero-sub">${content.heroSubtitle || description}</p>
     <div class="hero-btns">
-      <button class="btn-primary" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
-        ${content.heroCTA || 'Get Started'}
+      <button class="btn-primary" onclick="scrollTo('#contact')">
+        ${content.heroCTA || 'Get Started'} →
       </button>
-      <a href="https://wa.me/${content.whatsapp || '966500000000'}" class="btn-secondary" target="_blank">
-        💬 WhatsApp
+      <a href="https://wa.me/${waNum}" class="btn-ghost" target="_blank">
+        💬 WhatsApp Us
       </a>
+    </div>
+    <div class="hero-trust">
+      <div class="trust-avatars">
+        <div class="trust-avatar">😊</div>
+        <div class="trust-avatar">👤</div>
+        <div class="trust-avatar">🙂</div>
+      </div>
+      <div class="trust-text">Trusted by <strong>${content.stats?.[0]?.number || '500+'}</strong> happy clients</div>
     </div>
   </div>
 </section>
 
 <!-- STATS -->
-<section class="stats-section" id="stats">
-  <div class="container">
-    <div class="stats-grid">
-      ${(content.stats || []).map((s: any) => `
-        <div class="stat-card fade-in">
-          <div class="stat-number">${s.number}</div>
-          <div class="stat-label">${s.label}</div>
-        </div>
-      `).join('')}
-    </div>
+<div class="stats">
+  <div class="stats-inner">
+    ${(content.stats || []).map((s: any) => `
+      <div class="stat-item reveal">
+        <div class="stat-num">${s.number}</div>
+        <div class="stat-lbl">${s.label}</div>
+      </div>
+    `).join('')}
   </div>
-</section>
+</div>
 
 <!-- SERVICES -->
-<section class="services-section" id="services">
+<section class="services-bg" id="services">
   <div class="container">
-    <div class="section-label">Our Services</div>
-    <h2 class="section-title">What We Offer</h2>
+    <div class="section-tag">Our Services</div>
+    <h2 class="section-h">What We Do Best</h2>
     <p class="section-sub">${content.heroSubtitle || description}</p>
     <div class="services-grid">
       ${(content.services || []).map((s: any) => `
-        <div class="service-card fade-in">
-          <div class="service-icon">${s.icon}</div>
-          <div class="service-title">${s.title}</div>
-          <div class="service-desc">${s.desc}</div>
+        <div class="service-card reveal">
+          <div class="service-icon-wrap">${s.icon}</div>
+          <div class="service-t">${s.title}</div>
+          <div class="service-d">${s.desc}</div>
+          <div class="service-arrow">→</div>
         </div>
       `).join('')}
     </div>
@@ -502,36 +543,46 @@ Return ONLY a JSON object (no markdown, no explanation):
 </section>
 
 <!-- ABOUT -->
-<section class="about-section" id="about">
+<section class="about-bg" id="about">
   <div class="container">
     <div class="about-grid">
-      <div class="about-visual fade-in">
-        ${websiteType === 'restaurant' ? '🍽️' : websiteType === 'gym' ? '💪' : websiteType === 'medical' ? '🏥' : '✦'}
+      <div class="about-visual-wrap reveal-left">
+        <div class="about-visual">${emoji}</div>
+        <div class="about-badge">
+          <div class="about-badge-icon">⭐</div>
+          <div>
+            <div class="about-badge-num">${content.stats?.[2]?.number || '98%'}</div>
+            <div class="about-badge-text">${content.stats?.[2]?.label || 'Satisfaction Rate'}</div>
+          </div>
+        </div>
       </div>
-      <div class="about-text fade-in">
-        <div class="section-label">About Us</div>
-        <h2 class="section-title">Who We Are</h2>
-        <p>${content.about || description}</p>
-        <button class="btn-primary" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})" style="margin-top:16px;">
-          ${content.heroCTA || 'Contact Us'}
-        </button>
+      <div class="reveal-right">
+        <div class="section-tag">About Us</div>
+        <h2 class="section-h">Who We Are</h2>
+        <p class="section-sub">${content.about || description}</p>
+        <div class="about-features">
+          ${(content.whyUs || []).slice(0,3).map((w: any) => `
+            <div class="about-feature">${w.title}</div>
+          `).join('')}
+        </div>
+        <button class="btn-primary" onclick="scrollTo('#contact')">${content.heroCTA || 'Contact Us'} →</button>
       </div>
     </div>
   </div>
 </section>
 
 <!-- WHY US -->
-<section class="whyus-section">
+<section class="whyus-bg">
   <div class="container">
-    <div class="section-label">Why Choose Us</div>
-    <h2 class="section-title">Our Advantages</h2>
+    <div class="section-tag">Why Choose Us</div>
+    <h2 class="section-h">Our Advantages</h2>
     <div class="whyus-grid">
       ${(content.whyUs || []).map((w: any) => `
-        <div class="whyus-card fade-in">
+        <div class="whyus-card reveal">
           <div class="whyus-icon">${w.icon}</div>
           <div>
-            <div class="whyus-title">${w.title}</div>
-            <div class="whyus-desc">${w.desc}</div>
+            <div class="whyus-t">${w.title}</div>
+            <div class="whyus-d">${w.desc}</div>
           </div>
         </div>
       `).join('')}
@@ -540,17 +591,22 @@ Return ONLY a JSON object (no markdown, no explanation):
 </section>
 
 <!-- TESTIMONIALS -->
-<section class="testimonials-section">
+<section class="testi-bg">
   <div class="container">
-    <div class="section-label">Testimonials</div>
-    <h2 class="section-title">What Our Clients Say</h2>
-    <div class="testimonials-grid">
+    <div class="section-tag">Testimonials</div>
+    <h2 class="section-h">What Clients Say</h2>
+    <div class="testi-grid">
       ${(content.testimonials || []).map((t: any) => `
-        <div class="testimonial-card fade-in">
-          <div class="stars">⭐⭐⭐⭐⭐</div>
-          <div class="testimonial-text">"${t.text}"</div>
-          <div class="testimonial-name">${t.name}</div>
-          <div class="testimonial-role">${t.role}</div>
+        <div class="testi-card reveal">
+          <div class="testi-stars">★★★★★</div>
+          <div class="testi-text">"${t.text}"</div>
+          <div class="testi-author">
+            <div class="testi-avatar">${t.name?.[0] || 'A'}</div>
+            <div>
+              <div class="testi-name">${t.name}</div>
+              <div class="testi-role">${t.role}</div>
+            </div>
+          </div>
         </div>
       `).join('')}
     </div>
@@ -558,16 +614,16 @@ Return ONLY a JSON object (no markdown, no explanation):
 </section>
 
 <!-- FAQ -->
-<section class="faq-section">
+<section class="faq-bg">
   <div class="container">
-    <div class="section-label">FAQ</div>
-    <h2 class="section-title">Common Questions</h2>
-    <div style="max-width:700px;margin:0 auto;">
+    <div class="section-tag">FAQ</div>
+    <h2 class="section-h">Common Questions</h2>
+    <div class="faq-wrap">
       ${(content.faq || []).map((f: any, i: number) => `
-        <div class="faq-item">
+        <div class="faq-item" id="faq-${i}">
           <div class="faq-q" onclick="toggleFaq(${i})">
             <span>${f.q}</span>
-            <span id="faq-icon-${i}">+</span>
+            <span class="faq-icon">+</span>
           </div>
           <div class="faq-a" id="faq-a-${i}">${f.a}</div>
         </div>
@@ -577,43 +633,49 @@ Return ONLY a JSON object (no markdown, no explanation):
 </section>
 
 <!-- CONTACT -->
-<section class="contact-section" id="contact">
+<section class="contact-bg" id="contact">
   <div class="container">
-    <div class="section-label">Contact Us</div>
-    <h2 class="section-title">Get In Touch</h2>
+    <div class="section-tag">Contact Us</div>
+    <h2 class="section-h">Get In Touch</h2>
     <div class="contact-grid">
-      <div class="contact-info">
-        <div class="contact-item">
-          <span class="contact-item-icon">📞</span>
-          <div><div class="contact-item-label">Phone</div><div class="contact-item-value">${content.phone}</div></div>
+      <div class="contact-info reveal-left">
+        <div class="contact-card">
+          <div class="contact-icon">📞</div>
+          <div><div class="contact-label">Phone</div><div class="contact-val">${content.phone || '+966 50 000 0000'}</div></div>
         </div>
-        <div class="contact-item">
-          <span class="contact-item-icon">📧</span>
-          <div><div class="contact-item-label">Email</div><div class="contact-item-value">${content.email}</div></div>
+        <div class="contact-card">
+          <div class="contact-icon">📧</div>
+          <div><div class="contact-label">Email</div><div class="contact-val">${content.email || 'info@business.com'}</div></div>
         </div>
-        <div class="contact-item">
-          <span class="contact-item-icon">📍</span>
-          <div><div class="contact-item-label">Address</div><div class="contact-item-value">${content.address}</div></div>
+        <div class="contact-card">
+          <div class="contact-icon">📍</div>
+          <div><div class="contact-label">Address</div><div class="contact-val">${content.address || 'Saudi Arabia'}</div></div>
         </div>
-        <div class="contact-item">
-          <span class="contact-item-icon">🕐</span>
-          <div><div class="contact-item-label">Hours</div><div class="contact-item-value">${content.hours}</div></div>
+        <div class="contact-card">
+          <div class="contact-icon">🕐</div>
+          <div><div class="contact-label">Working Hours</div><div class="contact-val">${content.hours || 'Daily 8AM - 10PM'}</div></div>
         </div>
-        <a href="https://wa.me/${content.whatsapp || '966500000000'}" target="_blank" class="btn-primary" style="text-align:center;padding:14px;border-radius:10px;display:block;">
+        <a href="https://wa.me/${waNum}" class="wa-btn" target="_blank">
           💬 Message on WhatsApp
         </a>
       </div>
-      <div>
-        <div class="form-success" id="formSuccess">✅ Message sent! We'll contact you soon.</div>
-        <form class="contact-form" onsubmit="handleSubmit(event)">
-          <input class="form-input" id="fname" type="text" placeholder="Your Name" />
-          <div class="form-error" id="fnameErr">Please enter your name</div>
-          <input class="form-input" id="femail" type="email" placeholder="Your Email" />
-          <div class="form-error" id="femailErr">Please enter a valid email</div>
-          <input class="form-input" id="fphone" type="tel" placeholder="Phone Number" />
-          <textarea class="form-textarea" id="fmsg" placeholder="Your Message"></textarea>
-          <div class="form-error" id="fmsgErr">Please enter your message</div>
-          <button type="submit" class="form-btn">Send Message →</button>
+      <div class="reveal-right">
+        <div class="form-success" id="formSuccess">✅ Message sent successfully! We'll contact you soon.</div>
+        <form class="form" onsubmit="handleForm(event)">
+          <div class="form-row">
+            <div>
+              <input class="form-input" id="fname" placeholder="Your Name" />
+              <div class="form-err" id="fname-err">Please enter your name</div>
+            </div>
+            <div>
+              <input class="form-input" id="fphone" placeholder="Phone Number" type="tel" />
+            </div>
+          </div>
+          <input class="form-input" id="femail" placeholder="Email Address" type="email" />
+          <div class="form-err" id="femail-err">Please enter a valid email</div>
+          <textarea class="form-textarea" id="fmsg" placeholder="How can we help you?"></textarea>
+          <div class="form-err" id="fmsg-err">Please enter your message</div>
+          <button type="submit" class="submit-btn">Send Message →</button>
         </form>
       </div>
     </div>
@@ -623,72 +685,115 @@ Return ONLY a JSON object (no markdown, no explanation):
 <!-- FOOTER -->
 <footer>
   <div class="footer-inner">
-    <div class="footer-logo">✦ ${content.brand || brandName}</div>
-    <div class="footer-text">${content.footerText || description}</div>
-    <a href="https://wa.me/${content.whatsapp || '966500000000'}" target="_blank" style="color:var(--accent);font-weight:700;">💬 WhatsApp</a>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo"><span>${emoji}</span>${content.brand || brandName}</div>
+        <p>${content.footerText || description}</p>
+      </div>
+      <div class="footer-links">
+        <h4>Quick Links</h4>
+        <ul>
+          ${(content.navLinks || ['Home','About','Services','Contact']).map((l: string) =>
+            `<li><a href="#${l.toLowerCase().replace(/\s+/g,'-')}">${l}</a></li>`
+          ).join('')}
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="tel:${content.phone || ''}">${content.phone || '+966 50 000 0000'}</a></li>
+          <li><a href="mailto:${content.email || ''}">${content.email || 'info@business.com'}</a></li>
+          <li><a href="#">${content.address || 'Saudi Arabia'}</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-copy">© ${new Date().getFullYear()} ${content.brand || brandName}. All rights reserved. Built with PromptiFill AI ✦</div>
   </div>
-  <div class="footer-copy">© ${new Date().getFullYear()} ${content.brand || brandName}. All rights reserved.</div>
 </footer>
 
 <script>
-  // Hamburger menu
-  const hamburger = document.getElementById('hamburger');
-  const mobileMenu = document.getElementById('mobileMenu');
-  hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
-  function closeMobile() { mobileMenu.classList.remove('open'); }
-
-  // Navbar on scroll
-  window.addEventListener('scroll', () => {
-    const nav = document.getElementById('navbar');
-    const scrollBar = document.getElementById('scrollBar');
-    const backTop = document.getElementById('backTop');
-    const scrollPct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-    scrollBar.style.width = scrollPct + '%';
-    nav.style.boxShadow = window.scrollY > 50 ? '0 4px 30px rgba(0,0,0,0.4)' : '0 2px 20px rgba(0,0,0,0.3)';
-    backTop.classList.toggle('show', window.scrollY > 400);
-  });
-
+// Scroll progress
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  const pct=(window.scrollY/(h.scrollHeight-h.clientHeight))*100;
+  document.getElementById('progress-bar').style.width=pct+'%';
+  // Navbar
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>60);
   // Back to top
-  document.getElementById('backTop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-
-  // Fade in animation
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-  // FAQ
-  function toggleFaq(i) {
-    const ans = document.getElementById('faq-a-' + i);
-    const icon = document.getElementById('faq-icon-' + i);
-    ans.classList.toggle('open');
-    icon.textContent = ans.classList.contains('open') ? '−' : '+';
-  }
-
-  // Form validation
-  function handleSubmit(e) {
+  document.getElementById('backTop').classList.toggle('show',window.scrollY>400);
+});
+// Back to top
+document.getElementById('backTop').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+// Mobile menu
+function toggleMenu(){
+  const m=document.getElementById('mobileMenu');
+  const h=document.getElementById('hamburger');
+  m.classList.toggle('open');
+  h.classList.toggle('open');
+}
+function closeMenu(){
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+// Smooth scroll
+function scrollTo(target){
+  const el=document.querySelector(target);
+  if(el)el.scrollIntoView({behavior:'smooth'});
+}
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
     e.preventDefault();
-    let valid = true;
-    const name = document.getElementById('fname').value.trim();
-    const email = document.getElementById('femail').value.trim();
-    const msg = document.getElementById('fmsg').value.trim();
-    document.getElementById('fnameErr').style.display = name ? 'none' : 'block';
-    document.getElementById('femailErr').style.display = (email && email.includes('@')) ? 'none' : 'block';
-    document.getElementById('fmsgErr').style.display = msg ? 'none' : 'block';
-    if (!name || !email || !email.includes('@') || !msg) return;
-    document.getElementById('formSuccess').style.display = 'block';
-    e.target.reset();
-    setTimeout(() => document.getElementById('formSuccess').style.display = 'none', 5000);
-  }
-
-  // Smooth scroll for nav links
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      e.preventDefault();
-      const target = document.querySelector(a.getAttribute('href'));
-      if (target) target.scrollIntoView({ behavior: 'smooth' });
-    });
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t)t.scrollIntoView({behavior:'smooth'});
   });
+});
+// Reveal animations
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}
+  });
+},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el=>observer.observe(el));
+// FAQ
+function toggleFaq(i){
+  const item=document.getElementById('faq-'+i);
+  const ans=document.getElementById('faq-a-'+i);
+  const icon=item.querySelector('.faq-icon');
+  const isOpen=ans.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(a=>{a.classList.remove('open');});
+  document.querySelectorAll('.faq-item').forEach(it=>{it.classList.remove('active');});
+  document.querySelectorAll('.faq-icon').forEach(ic=>{ic.textContent='+';});
+  if(!isOpen){
+    ans.classList.add('open');
+    item.classList.add('active');
+    icon.textContent='+';
+  }
+}
+// Form
+function handleForm(e){
+  e.preventDefault();
+  let valid=true;
+  const name=document.getElementById('fname').value.trim();
+  const email=document.getElementById('femail').value.trim();
+  const msg=document.getElementById('fmsg').value.trim();
+  const showErr=(id,show)=>{document.getElementById(id).classList.toggle('show',show);};
+  showErr('fname-err',!name);
+  showErr('femail-err',!email||!email.includes('@'));
+  showErr('fmsg-err',!msg);
+  if(!name||!email||!email.includes('@')||!msg)return;
+  const btn=e.target.querySelector('.submit-btn');
+  btn.textContent='Sending...';btn.disabled=true;
+  setTimeout(()=>{
+    document.getElementById('formSuccess').classList.add('show');
+    e.target.reset();
+    btn.textContent='Send Message →';btn.disabled=false;
+    setTimeout(()=>document.getElementById('formSuccess').classList.remove('show'),5000);
+  },1000);
+}
+// Stagger animations
+document.querySelectorAll('.services-grid .service-card,.testi-grid .testi-card').forEach((el,i)=>{
+  el.style.transitionDelay=(i*0.08)+'s';
+});
 </script>
 </body>
 </html>`;
