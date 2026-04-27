@@ -95,7 +95,7 @@ Return ONLY the HTML code starting with <!DOCTYPE html>`;
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
-      max_tokens: 3000,
+      max_tokens: 3500,
       messages: [{ role: 'user', content: prompt }],
     });
 
@@ -156,7 +156,7 @@ Return ONLY the HTML code starting with <!DOCTYPE html>`;
     }
 
     // Validate
-    if (!html.includes('<!DOCTYPE') || !html.includes('<body')) {
+    if (html.length < 500 ) {
       return NextResponse.json({ error: 'Generation incomplete. Please try again.' }, { status: 500 });
     }
 
