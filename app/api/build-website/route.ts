@@ -68,42 +68,26 @@ export async function POST(req: NextRequest) {
     }) : null;
     const plan = dbUser?.plan ?? 'FREE';
 
-    // Rate limiting
-    if (userId) {
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const buildsToday = await prisma.promptRun.count({
-    where: { userId, category: 'website_build', createdAt: { gte: today } },
-  });
-  const limit = plan === 'FREE' ? 2 : 999;
-  if (buildsToday >= limit) {
-    return NextResponse.json({
-      error: 'daily_limit',
-      message: 'Free plan includes 2 website builds per day. Upgrade to Pro for unlimited.',
-    }, { status: 429 });
-  }
-}
+    // ── Rate limiting for ALL users ─────────────────────
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ||
+               req.headers.get('x-real-ip') || 'unknown';
+    const trackId = userId || ('ip_' + ip);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
 
-// Rate limit for NOT logged in users — IP based
-if (!userId) {
-  const ip = req.headers.get('x-forwarded-for') ||
-             req.headers.get('x-real-ip') ||
-             'unknown';
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const ipBuilds = await prisma.promptRun.count({
-    where: {
-      userId: `ip_${ip}`,
-      category: 'website_build',
-      createdAt: { gte: today },
-    },
-  });
-  if (ipBuilds >= 1) {
-    return NextResponse.json({
-      error: 'daily_limit',
-      message: 'Sign in to get 2 free builds per day. Pro plan = unlimited.',
-    }, { status: 429 });
-  }
-}
+    const buildsToday = await prisma.promptRun.count({
+      where: { userId: trackId, category: 'website_build', createdAt: { gte: today } },
+    });
 
+    const limit = userId ? (plan === 'FREE' ? 2 : 999) : 1;
+
+    if (buildsToday >= limit) {
+      return NextResponse.json({
+        error: 'daily_limit',
+        message: userId
+          ? 'Free plan includes 2 website builds per day. Upgrade to Pro for unlimited.'
+          : 'Sign in free to get 2 builds per day. Pro plan = unlimited.',
+      }, { status: 429 });
+    }
 
     const { websiteType, description, pages, style, features, language, brandName } = await req.json();
     if (!description || !websiteType) {
@@ -687,21 +671,18 @@ Return ONLY a JSON object (no markdown, no explanation):
 </body>
 </html>`;
 
-    // Save to DB
-    const saveUserId = userId || `ip_${req.headers.get('x-forwarded-for') || `unknown`}`;
-    if (userId) {
-      await prisma.promptRun.create({
-        data: {
-          userId: saveUserId,
-          prompt: `Website: ${brandName} - ${websiteType}`,
-          result: html.substring(0, 500),
-          category: 'website_build',
-          tokensUsed: contentRes.usage.input_tokens + contentRes.usage.output_tokens,
-          executionTime: 0,
-          plan,
-        },
-      });
-    }
+    // ── Save to DB for rate limiting (ALL users including guests) ──
+    await prisma.promptRun.create({
+      data: {
+        userId: trackId,
+        prompt: `Website: ${brandName} - ${websiteType}`,
+        result: html.substring(0, 500),
+        category: 'website_build',
+        tokensUsed: contentRes.usage.input_tokens + contentRes.usage.output_tokens,
+        executionTime: 0,
+        plan: userId ? plan : 'FREE',
+      },
+    });
 
     return NextResponse.json({
       success: true,
